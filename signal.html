@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIGNAL — a living neural field</title>
+<style>
+  :root {
+    --ink: #e8ecf4;
+    --dim: rgba(232, 236, 244, 0.38);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: #04060c;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    cursor: crosshair;
+  }
+  canvas { display: block; position: fixed; inset: 0; }
+
+  .vignette {
+    position: fixed; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.55) 100%);
+  }
+
+  header {
+    position: fixed; top: 2.4rem; left: 2.6rem;
+    pointer-events: none; user-select: none;
+    animation: rise 1.6s cubic-bezier(.2,.8,.2,1) both;
+  }
+  h1 {
+    font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+    font-weight: 200; letter-spacing: 0.55em;
+    color: var(--ink); text-transform: uppercase;
+  }
+  h1 b { font-weight: 600; }
+  header p {
+    margin-top: 0.7rem;
+    font-size: 0.72rem; letter-spacing: 0.3em;
+    color: var(--dim); text-transform: uppercase;
+  }
+
+  .hud {
+    position: fixed; bottom: 2.2rem; left: 2.6rem;
+    pointer-events: none; user-select: none;
+    display: flex; gap: 2.6rem;
+    animation: rise 1.6s 0.3s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .stat span:first-child {
+    display: block; font-size: 1.35rem; font-weight: 300;
+    color: var(--ink); font-variant-numeric: tabular-nums;
+  }
+  .stat span:last-child {
+    font-size: 0.6rem; letter-spacing: 0.28em;
+    color: var(--dim); text-transform: uppercase;
+  }
+
+  .hint {
+    position: fixed; bottom: 2.4rem; right: 2.6rem;
+    font-size: 0.66rem; letter-spacing: 0.3em;
+    color: var(--dim); text-transform: uppercase;
+    pointer-events: none; user-select: none;
+    animation: rise 1.6s 0.5s cubic-bezier(.2,.8,.2,1) both;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="field"></canvas>
+<div class="vignette"></div>
+
+<header>
+  <h1>SIG<b>NAL</b></h1>
+  <p>a living neural field</p>
+</header>
+
+<div class="hud">
+  <div class="stat"><span id="neuronCount">0</span><span>neurons</span></div>
+  <div class="stat"><span id="synapseCount">0</span><span>synapses</span></div>
+  <div class="stat"><span id="rate">0</span><span>spikes / sec</span></div>
+</div>
+
+<div class="hint">move to excite &nbsp;·&nbsp; click to fire</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('field');
+  const ctx = canvas.getContext('2d');
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+  let W = 0, H = 0;
+  let neurons = [];
+  let spikes = [];      // pulses travelling along synapses
+  let ripples = [];     // click shockwaves
+  const mouse = { x: -9999, y: -9999, active: false };
+
+  const PALETTE = [
+    { core: 'rgba(140, 200, 255,', glow: 'rgba(80, 140, 255,' },   // cyan-blue
+    { core: 'rgba(190, 160, 255,', glow: 'rgba(130, 90, 255,' },   // violet
+    { core: 'rgba(140, 255, 220,', glow: 'rgba(60, 220, 170,' },   // teal
+  ];
+
+  // ---------- network construction ----------
+
+  function build() {
+    neurons = [];
+    spikes = [];
+    const target = Math.round(Math.min(170, Math.max(70, (W * H) / 14000)));
+
+    // scatter, then relax for organic spacing
+    for (let i = 0; i < target; i++) {
+      neurons.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: 0, vy: 0,
+        v: Math.random() * 0.3,       // membrane potential 0..1
+        threshold: 0.75 + Math.random() * 0.2,
+        refractory: 0,
+        radius: 2.2 + Math.random() * 2.6,
+        links: [],
+        flash: 0,
+        palette: PALETTE[(Math.random() * PALETTE.length) | 0],
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+
+    // relaxation passes — push apart, gently
+    for (let pass = 0; pass < 40; pass++) {
+      for (let i = 0; i < neurons.length; i++) {
+        for (let j = i + 1; j < neurons.length; j++) {
+          const a = neurons[i], b = neurons[j];
+          let dx = b.x - a.x, dy = b.y - a.y;
+          let d = Math.hypot(dx, dy) || 0.01;
+          const min = 70;
+          if (d < min) {
+            const f = (min - d) / min * 0.45;
+            dx /= d; dy /= d;
+            a.x -= dx * f * d * 0.05; a.y -= dy * f * d * 0.05;
+            b.x += dx * f * d * 0.05; b.y += dy * f * d * 0.05;
+          }
+        }
+      }
+      for (const n of neurons) {
+        n.x = Math.max(30, Math.min(W - 30, n.x));
+        n.y = Math.max(30, Math.min(H - 30, n.y));
+      }
+    }
+
+    // wire k-nearest neighbours
+    let synapses = 0;
+    for (let i = 0; i < neurons.length; i++) {
+      const a = neurons[i];
+      const dists = neurons
+        .map((b, j) => ({ j, d: Math.hypot(b.x - a.x, b.y - a.y) }))
+        .filter(o => o.j !== i)
+        .sort((p, q) => p.d - q.d);
+      const k = 3 + ((Math.random() * 3) | 0);
+      for (let n = 0; n < k && n < dists.length; n++) {
+        if (dists[n].d < Math.min(W, H) * 0.28) {
+          a.links.push(dists[n].j);
+          synapses++;
+        }
+      }
+    }
+
+    document.getElementById('neuronCount').textContent = neurons.length;
+    document.getElementById('synapseCount').textContent = synapses;
+  }
+
+  // ---------- simulation ----------
+
+  function fire(n) {
+    n.v = 0;
+    n.refractory = 0.5 + Math.random() * 0.4;
+    n.flash = 1;
+    spikeCount++;
+    for (const j of n.links) {
+      const b = neurons[j];
+      spikes.push({
+        x1: n.x, y1: n.y, x2: b.x, y2: b.y,
+        t: 0,
+        speed: 0.028 + Math.random() * 0.02,
+        target: j,
+        palette: n.palette,
+      });
+    }
+  }
+
+  let spikeCount = 0;
+  let rateWindow = [];
+
+  function step(dt) {
+    const t = performance.now() / 1000;
+
+    for (const n of neurons) {
+      // gentle drift so the field breathes
+      n.phase += dt * 0.4;
+      n.x += Math.cos(n.phase) * 0.06;
+      n.y += Math.sin(n.phase * 0.8) * 0.06;
+
+      n.flash *= 0.9;
+      if (n.refractory > 0) { n.refractory -= dt; continue; }
+
+      // slow leak toward rest + faint noise
+      n.v += (0.08 - n.v) * 0.004 + (Math.random() - 0.48) * 0.008;
+
+      // mouse field excites nearby neurons
+      const dm = Math.hypot(n.x - mouse.x, n.y - mouse.y);
+      if (dm < 160) n.v += (1 - dm / 160) * 0.035;
+
+      // rare spontaneous firing keeps it alive
+      if (Math.random() < 0.0006) n.v = n.threshold + 0.01;
+
+      if (n.v >= n.threshold) fire(n);
+    }
+
+    // propagate spikes
+    for (let i = spikes.length - 1; i >= 0; i--) {
+      const s = spikes[i];
+      s.t += s.speed * dt * 60;
+      if (s.t >= 1) {
+        const b = neurons[s.target];
+        if (b && b.refractory <= 0) b.v += 0.24 + Math.random() * 0.12;
+        spikes.splice(i, 1);
+      }
+    }
+
+    // ripples from clicks
+    for (let i = ripples.length - 1; i >= 0; i--) {
+      const r = ripples[i];
+      r.radius += r.speed * dt * 60;
+      r.alpha *= 0.965;
+      // shockwave depolarises everything it crosses
+      for (const n of neurons) {
+        const d = Math.abs(Math.hypot(n.x - r.x, n.y - r.y) - r.radius);
+        if (d < 24 && n.refractory <= 0) n.v += 0.3 * r.alpha;
+      }
+      if (r.alpha < 0.02) ripples.splice(i, 1);
+    }
+
+    // spikes/sec readout
+    const now = performance.now();
+    rateWindow.push(now);
+    while (rateWindow.length && rateWindow[0] < now - 1000) rateWindow.shift();
+  }
+
+  // ---------- rendering ----------
+
+  function draw() {
+    // motion-blur fade
+    ctx.fillStyle = 'rgba(4, 6, 12, 0.28)';
+    ctx.fillRect(0, 0, W, H);
+
+    // synapses
+    ctx.lineWidth = 0.6;
+    for (let i = 0; i < neurons.length; i++) {
+      const a = neurons[i];
+      for (const j of a.links) {
+        if (j < i) continue;
+        const b = neurons[j];
+        ctx.strokeStyle = `rgba(110, 140, 200, ${0.05 + a.flash * 0.15 + b.flash * 0.15})`;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+    }
+
+    // travelling spikes — bright comets
+    for (const s of spikes) {
+      const x = s.x1 + (s.x2 - s.x1) * s.t;
+      const y = s.y1 + (s.y2 - s.y1) * s.t;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, 10);
+      g.addColorStop(0, s.palette.core + '0.9)');
+      g.addColorStop(1, s.palette.core + '0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(x, y, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.beginPath();
+      ctx.arc(x, y, 1.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // neurons
+    for (const n of neurons) {
+      const charge = Math.min(1, n.v / n.threshold);
+      const r = n.radius * (1 + charge * 0.6 + n.flash * 1.6);
+
+      const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, r * 4);
+      g.addColorStop(0, n.palette.glow + (0.16 + charge * 0.22 + n.flash * 0.5) + ')');
+      g.addColorStop(1, n.palette.glow + '0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, r * 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = n.flash > 0.25
+        ? 'rgba(255,255,255,0.95)'
+        : n.palette.core + (0.45 + charge * 0.5) + ')';
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // click ripples
+    for (const r of ripples) {
+      ctx.strokeStyle = `rgba(180, 210, 255, ${r.alpha * 0.5})`;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // cursor aura
+    if (mouse.active) {
+      const g = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 160);
+      g.addColorStop(0, 'rgba(120, 170, 255, 0.05)');
+      g.addColorStop(1, 'rgba(120, 170, 255, 0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(mouse.x, mouse.y, 160, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // ---------- loop ----------
+
+  let last = performance.now();
+  let statTick = 0;
+
+  function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    step(dt);
+    draw();
+
+    if (++statTick % 20 === 0) {
+      document.getElementById('rate').textContent = rateWindow.length;
+      spikeCount = 0;
+    }
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- events ----------
+
+  function resize() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.fillStyle = '#04060c';
+    ctx.fillRect(0, 0, W, H);
+    build();
+  }
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('mousemove', e => {
+    mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true;
+  });
+  window.addEventListener('mouseleave', () => { mouse.active = false; mouse.x = -9999; mouse.y = -9999; });
+  window.addEventListener('click', e => {
+    ripples.push({ x: e.clientX, y: e.clientY, radius: 0, speed: 6, alpha: 1 });
+  });
+  window.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    mouse.x = t.clientX; mouse.y = t.clientY; mouse.active = true;
+  }, { passive: true });
+  window.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    ripples.push({ x: t.clientX, y: t.clientY, radius: 0, speed: 6, alpha: 1 });
+  }, { passive: true });
+
+  resize();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

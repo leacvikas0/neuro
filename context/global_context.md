@@ -43,3 +43,6 @@
 
 ### Chemistry
 - No sessions yet
+
+### AI
+- 2026-07-26: FULL RESTART. All past AI attempts discarded — Vikas's verdict: fragmented, random topics, no coherence, made things harder. Standing directive: ONE continuous thread, every concept kept VISIBLE and experiential, exercise builds that keep the concept on screen. Mentor = veteran model-builder; goal = diffusion + transformers understood fundamentally (math, why, code), Python taught alongside as the instrument. Learning plan being designed together, from zero.

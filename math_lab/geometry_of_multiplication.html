@@ -1,0 +1,1049 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Multiplication, seen — a private math journal</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23202B3C'/%3E%3Cpath d='M7 21h6v6H7zM19 21h6v6h-6z' fill='%23C7D8F0'/%3E%3Cpath d='M7 9h6v6H7z' fill='%23DE3A24'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #FAF9F4;
+    --panel: #FFFFFF;
+    --ink: #202B3C;
+    --ink-soft: rgba(32, 43, 60, 0.55);
+    --ink-faint: rgba(32, 43, 60, 0.28);
+    --gridline: rgba(90, 120, 175, 0.10);
+    --blue: #2E5FA3;
+    --blue-soft: #C7D8F0;
+    --red: #DE3A24;
+    --red-soft: #F7DDD6;
+    --green: #1E7A4C;
+    --green-soft: #DCEFE2;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(to right, var(--gridline) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--gridline) 1px, transparent 1px),
+      linear-gradient(to right, rgba(90,120,175,0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(90,120,175,0.05) 1px, transparent 1px);
+    background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
+    color: var(--ink);
+    font-family: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  section[id] { scroll-margin-top: 86px; }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, button:focus-visible, input:focus-visible, canvas:focus-visible {
+    outline: 3px solid var(--blue);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  .mono { font-family: "IBM Plex Mono", Consolas, monospace; }
+  .hand { font-family: "Caveat", cursive; }
+  .red { color: var(--red); }
+  .green { color: var(--green); }
+  .dim { color: var(--ink-soft); }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    background: rgba(250, 249, 244, 0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(32, 43, 60, 0.12);
+  }
+  nav .wrap {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 62px;
+  }
+  .wordmark { font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); }
+  .wordmark span { color: var(--red); font-weight: 500; }
+  .wordmark em { font-style: normal; color: var(--ink-soft); letter-spacing: 0.08em; }
+  .navlinks { display: flex; gap: 26px; }
+  .navlinks a {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .navlinks a:hover { color: var(--ink); text-decoration: none; }
+
+  .hero { padding: 170px 0 96px; }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 56px; align-items: center; }
+  .eyebrow {
+    display: inline-block; font-family: "Caveat", cursive; font-size: 1.5rem;
+    color: var(--green); transform: rotate(-1.5deg); margin-bottom: 8px;
+  }
+  h1 {
+    font-size: clamp(2.5rem, 5.6vw, 4.3rem);
+    font-weight: 600; letter-spacing: -0.025em; line-height: 1.02;
+    margin-bottom: 22px;
+  }
+  h1 .comma { color: var(--red); }
+  .dek { font-size: 1.08rem; color: var(--ink-soft); max-width: 30em; font-weight: 300; }
+  .dek b { color: var(--ink); font-weight: 500; }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid rgba(32, 43, 60, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 1px 0 rgba(32,43,60,0.04), 0 12px 32px rgba(32, 43, 60, 0.07);
+    padding: 18px;
+  }
+  .panel .ro {
+    font-family: "IBM Plex Mono", monospace; font-size: 0.82rem; color: var(--ink-soft);
+    letter-spacing: 0.02em; display: block; text-align: center; margin-top: 10px;
+  }
+  .panel .ro b { font-size: 1.05rem; color: var(--ink); font-weight: 500; }
+  .panel .ro b.neg { color: var(--red); }
+  .panel .ro b.pos { color: var(--green); }
+  canvas.demo { display: block; width: 100%; touch-action: none; cursor: grab; }
+  canvas.demo:active { cursor: grabbing; }
+  .demo-cap { text-align: center; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-top: 8px; }
+
+  .sec { padding: 84px 0; border-top: 1px solid rgba(32, 43, 60, 0.12); }
+  .sec-head { display: flex; align-items: baseline; gap: 22px; margin-bottom: 14px; }
+  .sec-num {
+    font-family: "IBM Plex Mono", monospace; font-size: 0.8rem; font-weight: 500;
+    color: var(--blue); letter-spacing: 0.12em; flex-shrink: 0;
+  }
+  .sec-rule { flex: 1; border-top: 1px solid rgba(32, 43, 60, 0.14); transform: translateY(-4px); }
+  h2 {
+    font-size: clamp(1.7rem, 3.4vw, 2.4rem); font-weight: 600;
+    letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 12px;
+  }
+  .sec .lede { color: var(--ink-soft); max-width: 44em; font-weight: 300; margin-bottom: 34px; }
+  .sec .lede b { color: var(--ink); font-weight: 500; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+  .card {
+    background: var(--panel); border: 1px solid rgba(32,43,60,0.1); border-radius: 10px;
+    padding: 22px 24px; position: relative;
+  }
+  .card h3 { font-size: 1.06rem; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 8px; }
+  .card p { font-size: 0.95rem; color: var(--ink-soft); font-weight: 300; }
+  .card p b { color: var(--ink); font-weight: 500; }
+  .card .tick { font-family: "Caveat", cursive; font-size: 1.25rem; color: var(--green); position: absolute; top: 14px; right: 18px; }
+  .card .tick.red { color: var(--red); }
+
+  .rule-head { font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 26px; }
+
+  .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 26px; align-items: start; margin-bottom: 26px; }
+  .beats { display: grid; gap: 26px; }
+  .beat h3 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.015em; margin-bottom: 6px; }
+  .beat .when { font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--red); margin-bottom: 10px; display: block; }
+  .beat p { color: var(--ink-soft); font-weight: 300; font-size: 0.98rem; max-width: 30em; }
+  .beat p b { color: var(--ink); font-weight: 500; }
+
+  .question-box {
+    background: var(--red-soft); border: 1.5px dashed var(--red);
+    border-radius: 10px; padding: 22px 26px; margin-top: 30px;
+  }
+  .question-box .hand { font-size: 1.35rem; color: var(--red); margin-bottom: 6px; display: block; }
+  .question-box p { font-size: 0.98rem; color: rgba(222, 58, 36, 0.85); max-width: 40em; }
+  .question-box p b { color: var(--red); font-weight: 600; }
+
+  .lesson { display: grid; gap: 12px; margin: 26px 0 0; counter-reset: li; padding: 0; }
+  .lesson li {
+    list-style: none; display: grid; grid-template-columns: 34px 1fr; gap: 14px;
+    color: var(--ink-soft); font-weight: 300; font-size: 0.98rem;
+  }
+  .lesson li::before {
+    counter-increment: li; content: counter(li);
+    font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; color: var(--blue);
+    border: 1px solid rgba(46, 95, 163, 0.4); border-radius: 50%;
+    width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+    transform: translateY(2px);
+  }
+  .lesson li b { color: var(--ink); font-weight: 600; }
+
+  .gal { display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 26px; }
+  .tile { background: var(--panel); border: 1px solid rgba(32,43,60,0.1); border-radius: 10px; overflow: hidden; }
+  .tile .tile-body { padding: 22px 24px 24px; }
+  .tile h3 { font-size: 1.12rem; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 6px; }
+  .tile h3 .dim { font-weight: 400; }
+  .tile p { font-size: 0.95rem; color: var(--ink-soft); font-weight: 300; }
+  .tile p b { color: var(--ink); font-weight: 500; }
+  .tile .ro { font-family: "IBM Plex Mono", monospace; font-size: 0.8rem; color: var(--ink-soft); display: block; margin-top: 12px; }
+  .tile .ro b { font-size: 0.95rem; color: var(--ink); font-weight: 500; }
+  .tile .panel { border: 0; box-shadow: none; padding: 0; border-bottom: 1px solid rgba(32,43,60,0.08); border-radius: 0; background: #FBFBF7; }
+
+  .ctl {
+    display: flex; align-items: center; gap: 12px; margin-top: 12px;
+    font-family: "IBM Plex Mono", monospace; font-size: 0.7rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  .ctl label { flex-shrink: 0; width: 58px; }
+  .ctl input[type=range] { flex: 1; accent-color: var(--blue); min-width: 0; }
+  .ctl .val { width: 56px; text-align: right; flex-shrink: 0; color: var(--ink); }
+
+  .loop {
+    background: var(--panel); border: 1px solid rgba(32,43,60,0.1); border-radius: 10px;
+    padding: 30px 32px; box-shadow: 0 12px 32px rgba(32,43,60,0.06);
+  }
+  .loop-dots { display: flex; gap: 10px; margin-bottom: 26px; }
+  .loop-dots button {
+    width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--ink-faint);
+    background: transparent; cursor: pointer; padding: 0;
+  }
+  .loop-dots button.on { background: var(--blue); border-color: var(--blue); }
+  .loop-stage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: center; }
+  .loop-stage h3 { font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }
+  .loop-stage .big { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 10px; }
+  .loop-stage .big small { font-size: 1.1rem; color: var(--ink-faint); font-weight: 400; margin-left: 10px; }
+  .loop-stage .desc { color: var(--ink-soft); font-weight: 300; font-size: 1rem; }
+  .loop-stage .desc b { color: var(--ink); font-weight: 500; }
+  .loop-art {
+    background: var(--paper); border: 1px solid rgba(32,43,60,0.1); border-radius: 8px;
+    padding: 20px; font-family: "IBM Plex Mono", monospace; font-size: 13px; line-height: 1.45;
+    overflow-x: auto; white-space: pre; color: var(--ink);
+  }
+  .loop-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 26px; }
+  .loop-nav button {
+    font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+    background: var(--ink); color: var(--paper); border: 0; border-radius: 6px;
+    padding: 10px 18px; cursor: pointer;
+  }
+  .loop-nav button:hover { background: var(--blue); }
+  .loop-nav button:disabled { background: var(--ink-faint); cursor: default; }
+  .loop-count { font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; letter-spacing: 0.14em; color: var(--ink-soft); }
+
+  .marginal {
+    display: none; position: absolute; transform: rotate(-3deg);
+    font-family: "Caveat", cursive; font-size: 1.45rem; color: var(--red);
+  }
+  .marginal.green { color: var(--green); }
+
+  footer { border-top: 1px solid rgba(32,43,60,0.12); padding: 70px 0 90px; }
+  footer h2 { font-size: 1.3rem; margin-bottom: 6px; }
+  .src {
+    background: #F2F1EA; border: 1px solid rgba(32,43,60,0.14); border-radius: 8px;
+    padding: 26px 28px; margin: 22px 0; font-family: "IBM Plex Mono", monospace;
+    font-size: 0.82rem; line-height: 1.75; white-space: pre-wrap; color: var(--ink);
+  }
+  .src .hl { color: var(--red); }
+  .postscript { font-family: "Caveat", cursive; font-size: 1.5rem; color: var(--ink-soft); }
+
+  .rv { opacity: 0; transform: translateY(16px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .rv.in { opacity: 1; transform: none; }
+
+  @keyframes fadeup { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+  .hero .fade { animation: fadeup 0.9s cubic-bezier(.2,.7,.2,1) both; }
+  .hero .fade.d1 { animation-delay: 0.12s; }
+  .hero .fade.d2 { animation-delay: 0.24s; }
+  .hero .fade.d3 { animation-delay: 0.4s; }
+
+  @media (min-width: 1240px) {
+    .marginal { display: block; }
+    .sec { position: relative; }
+  }
+  @media (max-width: 900px) {
+    .hero-grid, .split, .loop-stage { grid-template-columns: 1fr; }
+    .hero { padding: 130px 0 70px; }
+    .gal { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    body { font-size: 16px; }
+    .navlinks { display: none; }
+    .wrap { padding: 0 18px; }
+    .sec { padding: 64px 0; }
+    .loop { padding: 22px 20px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .rv { transition: none; opacity: 1; transform: none; }
+    .hero .fade { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="wordmark" href="#top">G<span>×</span> <em>multiplication, seen — a private math journal</em></a>
+    <div class="navlinks">
+      <a href="#method">00 rules</a>
+      <a href="#session0">01 session 0</a>
+      <a href="#question">02 the question</a>
+      <a href="#road">03 the road</a>
+      <a href="#loop">04 the loop</a>
+    </div>
+  </div>
+</nav>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow fade">a private notebook, opened</span>
+        <h1 class="fade d1">Multiplication,<br><span class="comma">seen.</span></h1>
+        <p class="dek fade d2">A geometry-first math journal. <b>One learner</b> who thinks in shapes, <b>one teacher</b> who draws first and names last. Below: session 0, the question it left open, and the road ahead — every idea a picture you can pull on.</p>
+        <p class="mono dim fade d3" style="margin-top:22px; font-size:0.72rem; letter-spacing:0.14em; text-transform:uppercase;">predict → test → surprise → understand</p>
+      </div>
+      <div class="panel fade d2" style="position:relative;">
+        <canvas id="hg" class="demo" style="height:380px" aria-label="Interactive grid showing multiplication as area. Drag the handles."></canvas>
+        <span class="ro"><b id="hgRo">3 × 4 = 12</b>&nbsp; cells — drag the handles</span>
+        <span class="demo-cap">move one — multiplication is an area</span>
+        <span class="marginal green" style="top:-42px; right:8px;">&ldquo;yes this is it&rdquo;</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="method">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <span class="sec-num">00</span>
+        <h2>Rules of the hunt</h2>
+        <span class="sec-rule"></span>
+      </div>
+      <p class="lede rv">One learner&rsquo;s brain wrote the rules: <b>geometry over symbols, the hunt before the answer, names after understanding</b>. The teacher follows them, or the lesson dies on the page.</p>
+      <div class="cards">
+        <div class="card rv"><span class="tick">done</span><h3>Geometry over symbols</h3><p>Every equation is a shape you can see. Symbols appear only <b>after</b> the picture is already his.</p></div>
+        <div class="card rv"><span class="tick">done</span><h3>Names come last</h3><p>&ldquo;That shape you just found? Mathematicians call it a <b>dot product</b>.&rdquo; Name after understanding — never before.</p></div>
+        <div class="card rv"><span class="tick">done</span><h3>Predict → test → surprise</h3><p>He guesses first, the picture answers, and the <b>surprise</b> does the teaching. Understanding is the end of the loop, not the start.</p></div>
+        <div class="card rv"><span class="tick">done</span><h3>One concept, one diagram</h3><p>One intentional visual per beat. Draw → ask → wait. Wrong answers are golden — they show <b>which shape</b> he is using.</p></div>
+        <div class="card rv"><span class="tick">done</span><h3>ASCII + question = the format</h3><p>His verdict on the very first session. <b>The diagram is the lesson; prose is the caption.</b></p></div>
+        <div class="card rv"><span class="tick red">never</span><h3>No answers. Trails only.</h3><p>He loves the hunt. Hand him the map in pieces, let him close the loop. <b>Leave trails, don&rsquo;t hand answers.</b></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="session0">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <span class="sec-num">01</span>
+        <h2>Session 0 — Feb 17, 2025</h2>
+        <span class="sec-rule"></span>
+      </div>
+      <p class="lede rv">No syllabus, no notation. Two moves with rectangles — and one question that left the room <b>unanswered</b>.</p>
+
+      <div class="beats">
+        <div class="split rv">
+          <div class="beat">
+            <span class="when">move one</span>
+            <h3>Multiplication is an area</h3>
+            <p>3 × 4 isn&rsquo;t &ldquo;three times four&rdquo;. It&rsquo;s the rectangle that appears when you lay <b>3 rows of 4</b> side by side — 12 cells. He saw it immediately. Set the sliders and watch the rectangle do the arithmetic.</p>
+          </div>
+          <div class="panel">
+            <canvas id="gd" class="demo" style="height:300px" aria-label="Grid where rows and columns are chosen with sliders."></canvas>
+            <div class="ctl">
+              <label for="gdR">rows</label>
+              <input type="range" id="gdR" min="1" max="8" step="1" value="3">
+              <span class="val" id="gdRV">3</span>
+            </div>
+            <div class="ctl">
+              <label for="gdC">cols</label>
+              <input type="range" id="gdC" min="1" max="8" step="1" value="4">
+              <span class="val" id="gdCV">4</span>
+            </div>
+            <span class="ro"><b id="gdRo">3 × 4 = 12</b></span>
+          </div>
+        </div>
+
+        <div class="split rv">
+          <div class="beat">
+            <span class="when">move two</span>
+            <h3>Decimals are cut lines</h3>
+            <p>0.5 × 4 is <b>half a row</b>. The rectangle doesn&rsquo;t shrink into fog — it gets cut. Fractions are just partial rectangles; the knife comes from the slider.</p>
+          </div>
+          <div class="panel">
+            <canvas id="hd" class="demo" style="height:240px" aria-label="A four-column grid whose height is a decimal fraction."></canvas>
+            <div class="ctl">
+              <label for="hdH">height</label>
+              <input type="range" id="hdH" min="0" max="1.5" step="0.05" value="0.5">
+              <span class="val" id="hdHV">0.5</span>
+            </div>
+            <span class="ro"><b id="hdRo">0.5 × 4 = 2</b></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-box rv">
+        <span class="hand">the open question</span>
+        <p><b>What does 3 × (−2) look like?</b> You can&rsquo;t draw &ldquo;less than nothing&rdquo; of a rectangle — not yet. He leaned in. Then the session pivoted to system design, and the question walked away, unanswered.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="question">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <span class="sec-num">02</span>
+        <h2>The question that walked away</h2>
+        <span class="sec-rule"></span>
+      </div>
+      <p class="lede rv">First item on the journal&rsquo;s list: <b>resolve it — geometrically</b>. Here is the picture the next session will find. The answer was hiding in the word &ldquo;multiply&rdquo; all along.</p>
+
+      <div class="split rv">
+        <div>
+          <div class="panel">
+            <canvas id="fl" class="demo" style="height:400px" aria-label="Draggable rectangle that flips across the axes when factors go negative."></canvas>
+            <span class="ro"><b id="flRo">3 × 2 = 6</b>&nbsp; <span id="flFlip" class="green">no flips — one side of the line</span></span>
+            <span class="demo-cap">drag the red handles — cross zero and the rectangle flips</span>
+          </div>
+          <ol class="lesson rv">
+            <li>The rectangle lives against <b>a line</b> — zero. Above it: positive. Below: negative.</li>
+            <li>−1 doesn&rsquo;t shrink the rectangle. <b>It flips it across the line.</b> Same shape, other side.</li>
+            <li>3 × (−2): the 3-by-2 rectangle, flipped below the line. Six cells of it — exactly the same shape — but on the other side. <b>That&rsquo;s why we call it −6.</b></li>
+            <li>Flip once and you cross (−). Flip twice and you&rsquo;re home (+). So (−2) × (−3) flips twice: <b>6</b>.</li>
+            <li>This is why negatives exist in math at all: <b>they&rsquo;re the flips of the shape world.</b></li>
+          </ol>
+        </div>
+        <div class="beat" style="position:relative;">
+          <span class="when">the resolution — reserved</span>
+          <h3>He gets to find this first</h3>
+          <p>The journal lists it as the next move. This page resolves it for <b>you, the reader</b> — the lesson keeps the answer wrapped, waiting for the day he reaches across zero himself. When he does, the rectangle flips, and &ldquo;negative number&rdquo; stops being a rule and becomes <b>a memory of crossing a line</b>.</p>
+          <p style="margin-top:16px;">Watch the dashed ghost when you drag a handle below zero: it shows where the rectangle <b>was</b>, before the flip. The flip is the arithmetic.</p>
+          <p style="margin-top:16px; font-size:0.95rem;"><b>Break it:</b> what happens when <i>both</i> handles cross? What does a rectangle that flipped twice look like? Where does the sign land — and where does it <i>feel</i> like it should land?</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="road">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <span class="sec-num">03</span>
+        <h2>The road ahead</h2>
+        <span class="sec-rule"></span>
+      </div>
+      <p class="lede rv">From the journal&rsquo;s &ldquo;What&rsquo;s Next&rdquo;. Every future concept is the <b>previous picture, promoted to a building block</b> — climb one step at a time, nothing named before it is seen.</p>
+      <div class="gal">
+        <div class="tile rv">
+          <div class="panel">
+            <canvas id="vd" class="demo" style="height:300px" aria-label="Layers of a two-by-three grid stacking into a box."></canvas>
+            <div class="ctl">
+              <label for="vdH">deep</label>
+              <input type="range" id="vdH" min="1" max="4" step="1" value="1">
+              <span class="val" id="vdHV">1</span>
+            </div>
+          </div>
+          <div class="tile-body">
+            <h3>Areas of areas <span class="dim">— the next question</span></h3>
+            <p>2 × 3 is a <b>layer</b>. Stack the layers and a new direction appears: 2 × 3 × 4 is a box of 24. <b>Multiply a multiplication and you grow a dimension.</b></p>
+            <span class="ro" id="vdRo">2 × 3 × 1 = 6 cells — a flat layer</span>
+          </div>
+        </div>
+        <div class="tile rv">
+          <div class="panel">
+            <canvas id="evd" class="demo" style="height:300px" aria-label="Two draggable arrows adding head to tail."></canvas>
+          </div>
+          <div class="tile-body">
+            <h3>Arrows <span class="dim">— vectors</span></h3>
+            <p>A vector is a <b>walk</b>: 3 right, 2 up. Walk one arrow after another and you&rsquo;ve added them — head to tail, no formulas. Drag the heads; the dashed arrow is the landing point.</p>
+            <span class="ro" id="evdRo">a + b = (4, 1)</span>
+          </div>
+        </div>
+        <div class="tile rv">
+          <div class="panel">
+            <canvas id="dd" class="demo" style="height:300px" aria-label="Two arrows and the shadow of one falling on the other."></canvas>
+          </div>
+          <div class="tile-body">
+            <h3>Shadows <span class="dim">— the dot product</span></h3>
+            <p>Ask how much one arrow <b>runs along</b> another: drop its shadow. Shadow × length of the other = the <b>dot product</b> — one number for &ldquo;how much same direction&rdquo;. Perpendicular arrows cast no shadow.</p>
+            <span class="ro" id="ddRo">A · B = 6</span>
+          </div>
+        </div>
+        <div class="tile rv">
+          <div class="panel">
+            <canvas id="md" class="demo" style="height:300px" aria-label="A rubber sheet square being stretched and sheared."></canvas>
+            <div class="ctl">
+              <label for="mdS">stretch</label>
+              <input type="range" id="mdS" min="0.5" max="2" step="0.05" value="1.3">
+              <span class="val" id="mdSV">1.3</span>
+            </div>
+            <div class="ctl">
+              <label for="mdH">shear</label>
+              <input type="range" id="mdH" min="0" max="1" step="0.05" value="0.4">
+              <span class="val" id="mdHV">0.4</span>
+            </div>
+          </div>
+          <div class="tile-body">
+            <h3>The rubber sheet <span class="dim">— matrices</span></h3>
+            <p>Pull the plane and the square becomes a parallelogram. Its area changes by exactly <b>one ratio</b> — the determinant. Notice: <b>shearing sideways never changes the area.</b> Matrices are just pulling the world.</p>
+            <span class="ro" id="mdRo">area × 1.30</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="loop">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <span class="sec-num">04</span>
+        <h2>The lesson is a loop</h2>
+        <span class="sec-rule"></span>
+      </div>
+      <p class="lede rv">Every session runs the same circle. The diagrams are deliberately <b>incomplete</b> — an open loop is a trail, and he loves the hunt. Step through the seven beats.</p>
+      <div class="loop rv">
+        <div class="loop-dots" id="loopDots" role="tablist" aria-label="Lesson loop steps"></div>
+        <div class="loop-stage">
+          <div>
+            <h3 id="lsTag">beat 1 of 7</h3>
+            <div class="big" id="lsName">Scene</div>
+            <p class="desc" id="lsDesc"></p>
+          </div>
+          <pre class="loop-art" id="lsArt"></pre>
+        </div>
+        <div class="loop-nav">
+          <button id="loopPrev" type="button">← back</button>
+          <span class="loop-count" id="loopCount">1 / 7</span>
+          <button id="loopNext" type="button">next →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="sec-num">S</span>
+      <h2>The page behind this page</h2>
+      <span class="sec-rule"></span>
+    </div>
+    <p class="lede rv">The source note, verbatim. Session log, updated after every session: <b>what covered, what clicked, what&rsquo;s next</b>.</p>
+    <div class="src rv" aria-label="The original math context note"></div>
+    <p class="postscript rv">&ldquo;Only the math teacher reads this.&rdquo; — you got the notebook. Names last. Trails only.</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const INK = '#202B3C', BLUE = '#2E5FA3', BLUESOFT = '#C7D8F0',
+        RED = '#DE3A24', GREEN = '#1E7A4C',
+        GRIDC = 'rgba(32,43,60,0.14)', GHOST = 'rgba(32,43,60,0.32)';
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+  const $ = id => document.getElementById(id);
+  const fmt = n => (Math.round(n * 10) / 10).toString().replace(/\.0$/, '');
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+  function fit(cv) {
+    const r = cv.getBoundingClientRect();
+    cv.width = Math.max(20, Math.round(r.width * DPR));
+    cv.height = Math.max(20, Math.round(r.height * DPR));
+  }
+  function g2d(cv) {
+    const c = cv.getContext('2d');
+    c.setTransform(DPR, 0, 0, DPR, 0, 0);
+    c.clearRect(0, 0, cv.width / DPR, cv.height / DPR);
+    return c;
+  }
+  function drag(cv, hitTest, onDrag) {
+    let active = null;
+    cv.addEventListener('pointerdown', e => {
+      const r = cv.getBoundingClientRect();
+      const p = { x: e.clientX - r.left, y: e.clientY - r.top };
+      const hit = hitTest(p);
+      if (!hit) return;
+      active = hit;
+      cv.setPointerCapture(e.pointerId);
+      onDrag(hit, p);
+    });
+    cv.addEventListener('pointermove', e => {
+      if (!active) return;
+      const r = cv.getBoundingClientRect();
+      onDrag(active, { x: e.clientX - r.left, y: e.clientY - r.top });
+    });
+    window.addEventListener('pointerup', () => { active = null; });
+  }
+
+  function drawCells(cx, ox, oy, rows, cols, S, colorFn) {
+    const r0 = Math.floor(rows), c0 = Math.floor(cols);
+    const fr = rows - r0, fc = cols - c0;
+    for (let i = 0; i <= r0; i++) {
+      const h = (i < r0) ? 1 : fr;
+      if (h <= 0.001) continue;
+      for (let j = 0; j <= c0; j++) {
+        const w = (j < c0) ? 1 : fc;
+        if (w <= 0.001) continue;
+        const x = ox + j * S, y = oy + i * S;
+        const col = colorFn ? colorFn(i, j, w, h) : null;
+        if (col) { cx.fillStyle = col; cx.fillRect(x, y, w * S, h * S); }
+      }
+    }
+    cx.strokeStyle = GRIDC; cx.lineWidth = 1;
+    cx.beginPath();
+    for (let j = 0; j <= c0; j++) {
+      const x = ox + j * S;
+      if (j === c0 && fc <= 0.001) continue;
+      cx.moveTo(x, oy); cx.lineTo(x, oy + Math.max(rows, 0.001) * S);
+    }
+    for (let i = 0; i <= r0; i++) {
+      const y = oy + i * S;
+      if (i === r0 && fr <= 0.001) continue;
+      cx.moveTo(ox, y); cx.lineTo(ox + Math.max(cols, 0.001) * S, y);
+    }
+    cx.stroke();
+    cx.strokeStyle = INK; cx.lineWidth = 1.5;
+    cx.strokeRect(ox, oy, Math.max(cols, 0.001) * S, Math.max(rows, 0.001) * S);
+  }
+  const cellColor = (i, j, w, h) => {
+    const f = Math.min(w * h, 1);
+    return 'rgba(46,95,163,' + (0.12 + 0.7 * f).toFixed(2) + ')';
+  };
+  const negColor = (i, j, w, h) => {
+    const f = Math.min(w * h, 1);
+    return 'rgba(222,58,36,' + (0.12 + 0.65 * f).toFixed(2) + ')';
+  };
+
+  function handle(cx, x, y, col, hover) {
+    cx.fillStyle = col;
+    cx.fillRect(x - 6, y - 6, 12, 12);
+    cx.strokeStyle = 'rgba(255,255,255,0.85)'; cx.lineWidth = 1.5;
+    cx.strokeRect(x - 6, y - 6, 12, 12);
+    if (hover) {
+      cx.strokeStyle = col; cx.lineWidth = 2;
+      cx.strokeRect(x - 10, y - 10, 20, 20);
+    }
+  }
+
+  const redraws = [];
+  window.addEventListener('resize', () => redraws.forEach(f => f()));
+
+  const heroGrid = () => {
+    const cv = $('hg'), ro = $('hgRo');
+    let a = 3, b = 4, dragK = null;
+    const a0 = 3, b0 = 4;
+    let S = 44, ox = 0, oy = 0, laidW = 0, laidH = 0;
+    function geom() {
+      const r = cv.getBoundingClientRect();
+      const W = r.width, H = r.height;
+      S = clamp(Math.min((W - 80) / 6, (H - 70) / 7), 20, 54);
+      if (Math.abs(W - laidW) > 1 || Math.abs(H - laidH) > 1) {
+        ox = (W - b0 * S) / 2 - 24;
+        oy = (H - a0 * S) / 2;
+        laidW = W; laidH = H;
+      }
+    }
+    function draw() {
+      fit(cv); const cx = g2d(cv); geom();
+      drawCells(cx, ox, oy, a, b, S, cellColor);
+      handle(cx, ox + b * S + 16, oy + (a * S) / 2, BLUE, dragK === 'b');
+      handle(cx, ox + (b * S) / 2, oy + a * S + 16, RED, dragK === 'a');
+      ro.textContent = fmt(a) + ' × ' + fmt(b) + ' = ' + fmt(a * b);
+    }
+    const hit = p => {
+      const d1 = Math.hypot(p.x - (ox + b * S + 16), p.y - (oy + (a * S) / 2));
+      const d2 = Math.hypot(p.x - (ox + (b * S) / 2), p.y - (oy + a * S + 16));
+      if (d1 < 24) return 'b';
+      if (d2 < 24) return 'a';
+      return null;
+    };
+    drag(cv, hit, (k, p) => {
+      dragK = k;
+      if (k === 'a') a = clamp(Math.round(((p.y - oy) / S) * 2) / 2, 0.5, 6);
+      if (k === 'b') b = clamp(Math.round(((p.x - ox) / S) * 2) / 2, 0.5, 6);
+      draw();
+    });
+    redraws.push(draw);
+    draw();
+  };
+
+  const bindSlider = (id, cb) => {
+    const el = $(id);
+    el.addEventListener('input', () => cb(parseFloat(el.value)));
+  };
+
+  const gridDemo = () => {
+    const cv = $('gd'), ro = $('gdRo');
+    let a = 3, b = 4, S = 30, ox = 0, oy = 0;
+    function draw() {
+      fit(cv); const cx = g2d(cv);
+      const r = cv.getBoundingClientRect();
+      S = clamp(Math.min((r.width - 50) / 8, (r.height - 50) / 8), 16, 40);
+      const w = b * S, h = a * S;
+      ox = (r.width - w) / 2; oy = (r.height - h) / 2;
+      drawCells(cx, ox, oy, a, b, S, cellColor);
+      ro.textContent = fmt(a) + ' × ' + fmt(b) + ' = ' + fmt(a * b);
+    }
+    bindSlider('gdR', v => { a = v; $('gdRV').textContent = v; draw(); });
+    bindSlider('gdC', v => { b = v; $('gdCV').textContent = v; draw(); });
+    redraws.push(draw);
+    draw();
+  };
+
+  const halfDemo = () => {
+    const cv = $('hd'), ro = $('hdRo');
+    let h = 0.5, S = 30, ox = 0, oy = 0;
+    function draw() {
+      fit(cv); const cx = g2d(cv);
+      const r = cv.getBoundingClientRect();
+      S = clamp(Math.min((r.width - 50) / 4, (r.height - 60) / 1.5), 18, 46);
+      const w = 4 * S, rh = h * S;
+      ox = (r.width - w) / 2; oy = (r.height - S) / 2;
+      drawCells(cx, ox, oy, h, 4, S, cellColor);
+      ro.textContent = fmt(h) + ' × 4 = ' + fmt(h * 4);
+    }
+    bindSlider('hdH', v => { h = v; $('hdHV').textContent = v; draw(); });
+    redraws.push(draw);
+    draw();
+  };
+
+  const flipLab = () => {
+    const cv = $('fl'), ro = $('flRo'), flip = $('flFlip');
+    let a = 3, b = 2, dragK = null;
+    let S = 34, ox = 0, oy = 0, W = 0, H = 0;
+    function geom() {
+      const r = cv.getBoundingClientRect();
+      W = r.width; H = r.height;
+      S = clamp(Math.min((W - 120) / 5, (H - 120) / 5), 18, 40);
+      ox = W / 2; oy = H / 2;
+    }
+    function draw() {
+      fit(cv); const cx = g2d(cv); geom();
+      cx.strokeStyle = 'rgba(32,43,60,0.22)'; cx.lineWidth = 1;
+      cx.beginPath();
+      cx.moveTo(0, oy); cx.lineTo(W, oy);
+      cx.moveTo(ox, 0); cx.lineTo(ox, H);
+      cx.stroke();
+      cx.fillStyle = 'rgba(32,43,60,0.3)';
+      cx.font = '11px IBM Plex Mono, monospace';
+      cx.fillText('+', W - 16, oy - 8);
+      cx.fillText('−', 18, oy - 8);
+      cx.fillText('+', ox + 8, 16);
+      cx.fillText('−', ox + 8, H - 12);
+      cx.fillStyle = 'rgba(32,43,60,0.45)';
+      cx.fillRect(ox - 3, oy - 3, 6, 6);
+
+      const aw = Math.abs(a), bw = Math.abs(b);
+      const neg = a < 0 || b < 0;
+      if (neg) {
+        cx.strokeStyle = GHOST; cx.lineWidth = 1; cx.setLineDash([5, 5]);
+        cx.strokeRect(ox, oy - aw * S, bw * S, aw * S);
+        cx.setLineDash([]);
+      }
+      const x0 = b >= 0 ? ox : ox - bw * S;
+      const y0 = a >= 0 ? oy - aw * S : oy;
+      drawCells(cx, x0, y0, aw, bw, S, neg ? negColor : cellColor);
+      handle(cx, ox, oy - a * S, RED, dragK === 'a');
+      handle(cx, ox + b * S, oy, BLUE, dragK === 'b');
+
+      const prod = Math.round(a * b * 10) / 10;
+      ro.textContent = fmt(a) + ' × ' + fmt(b) + ' = ' + fmt(prod);
+      ro.classList.toggle('neg', prod < 0);
+      ro.classList.toggle('pos', prod > 0);
+      const flips = (a < 0 ? 1 : 0) + (b < 0 ? 1 : 0);
+      flip.textContent = flips === 0 ? 'no flips — one side of the line' :
+        flips === 1 ? (a < 0 ? 'flipped once — across the horizontal' : 'flipped once — across the vertical') :
+        'flipped twice — back on top';
+      flip.className = flips === 2 ? 'green' : (flips === 1 ? 'red' : 'green');
+    }
+    const hit = p => {
+      const dA = Math.hypot(p.x - ox, p.y - (oy - a * S));
+      const dB = Math.hypot(p.x - (ox + b * S), p.y - oy);
+      if (dA < 22) return 'a';
+      if (dB < 22) return 'b';
+      return null;
+    };
+    drag(cv, hit, (k, p) => {
+      dragK = k;
+      if (k === 'a') a = clamp(Math.round(((oy - p.y) / S) * 2) / 2, -4.5, 4.5);
+      if (k === 'b') b = clamp(Math.round(((p.x - ox) / S) * 2) / 2, -4.5, 4.5);
+      draw();
+    });
+    redraws.push(draw);
+    draw();
+  };
+
+  const volumeDemo = () => {
+    const cv = $('vd'), ro = $('vdRo');
+    let h = 1;
+    const rows = 2, cols = 3;
+    function draw() {
+      fit(cv); const cx = g2d(cv);
+      const r = cv.getBoundingClientRect();
+      const cw = clamp(Math.min(
+        (r.width - 90) / (cols + (h - 1) * 0.42 + 0.5),
+        (r.height - 80) / (rows * 0.85 + (h - 1) * 0.31 + 0.5)
+      ), 14, 40);
+      const ch = cw * 0.85, dx = cw * 0.42, dy = ch * 0.36;
+      const baseW = cols * cw, baseH = rows * ch;
+      const x0 = (r.width - baseW - (h - 1) * dx) / 2;
+      const y0 = r.height - (h - 1) * dy - baseH - 26;
+      for (let k = 0; k < h - 1; k++) {
+        cx.fillStyle = 'rgba(46,95,163,0.35)';
+        cx.fillRect(x0 + baseW + k * dx, y0 + (k + 1) * dy, dx, baseH - dy);
+      }
+      for (let k = h - 1; k >= 0; k--) {
+        const ly = y0 + k * dy, lx = x0 + k * dx;
+        drawCells(cx, lx, ly, rows, cols, cw, cellColor);
+      }
+      ro.textContent = '2 × 3 × ' + h + ' = ' + (6 * h) + ' cells' + (h === 1 ? ' — a flat layer, the 2×3 area again' : ' — a box, a new dimension');
+    }
+    bindSlider('vdH', v => { h = v; $('vdHV').textContent = v; draw(); });
+    redraws.push(draw);
+    draw();
+  };
+
+  const drawArrow = (cx, x1, y1, x2, y2, col, lw) => {
+    const ang = Math.atan2(y2 - y1, x2 - x1);
+    cx.strokeStyle = col; cx.lineWidth = lw || 3; cx.lineCap = 'round';
+    cx.beginPath(); cx.moveTo(x1, y1); cx.lineTo(x2, y2); cx.stroke();
+    cx.fillStyle = col;
+    cx.beginPath();
+    cx.moveTo(x2 + 12 * Math.cos(ang), y2 + 12 * Math.sin(ang));
+    cx.lineTo(x2 + 5 * Math.cos(ang + 2.6), y2 + 5 * Math.sin(ang + 2.6));
+    cx.lineTo(x2 + 5 * Math.cos(ang - 2.6), y2 + 5 * Math.sin(ang - 2.6));
+    cx.closePath(); cx.fill();
+  };
+
+  const vectorDemo = () => {
+    const cv = $('evd'), ro = $('evdRo');
+    let a = { x: 3, y: 2 }, b = { x: 1, y: -1 }, dragK = null;
+    const S = 22, ox = 70, oy = 150;
+    function draw() {
+      fit(cv); const cx = g2d(cv);
+      const r = cv.getBoundingClientRect();
+      cx.strokeStyle = 'rgba(32,43,60,0.1)'; cx.lineWidth = 1;
+      for (let gx = ox; gx < r.width; gx += S) {
+        cx.beginPath(); cx.moveTo(gx, 0); cx.lineTo(gx, r.height); cx.stroke();
+      }
+      for (let gy = 0; gy < r.height; gy += S) {
+        cx.beginPath(); cx.moveTo(0, gy); cx.lineTo(r.width, gy); cx.stroke();
+      }
+      const px = v => ox + v.x * S, py = v => oy - v.y * S;
+      const P1 = { x: px(a), y: py(a) }, P2 = { x: px(b), y: py(b) };
+      const sum = { x: px({ x: a.x + b.x, y: a.y + b.y }), y: py({ x: a.x + b.x, y: a.y + b.y }) };
+      cx.beginPath();
+      cx.moveTo(ox, oy); cx.lineTo(P1.x, P1.y); cx.lineTo(sum.x, sum.y);
+      cx.moveTo(ox, oy); cx.lineTo(P2.x, P2.y); cx.lineTo(sum.x, sum.y);
+      cx.stroke();
+      drawArrow(cx, ox, oy, P1.x, P1.y, BLUE, 3);
+      drawArrow(cx, ox, oy, P2.x, P2.y, GREEN, 3);
+      cx.setLineDash([6, 5]);
+      drawArrow(cx, ox, oy, sum.x, sum.y, 'rgba(32,43,60,0.55)', 2.5);
+      cx.setLineDash([]);
+      handle(cx, P1.x, P1.y, BLUE, dragK === 'a');
+      handle(cx, P2.x, P2.y, GREEN, dragK === 'b');
+      ro.innerHTML = 'a = (' + fmt(a.x) + ', ' + fmt(a.y) + ')&nbsp;&nbsp; b = (' + fmt(b.x) + ', ' + fmt(b.y) + ')&nbsp;&nbsp; <b>a + b = (' + fmt(a.x + b.x) + ', ' + fmt(a.y + b.y) + ')</b>';
+    }
+    const hit = p => {
+      const P1 = { x: ox + a.x * S, y: oy - a.y * S }, P2 = { x: ox + b.x * S, y: oy - b.y * S };
+      if (Math.hypot(p.x - P1.x, p.y - P1.y) < 22) return 'a';
+      if (Math.hypot(p.x - P2.x, p.y - P2.y) < 22) return 'b';
+      return null;
+    };
+    drag(cv, hit, (k, p) => {
+      dragK = k;
+      const v = { x: clamp(Math.round(((p.x - ox) / S) * 2) / 2, -6, 6), y: clamp(Math.round(((oy - p.y) / S) * 2) / 2, -5, 5) };
+      if (k === 'a') a = v; else b = v;
+      draw();
+    });
+    redraws.push(draw);
+    draw();
+  };
+
+  const dotDemo = () => {
+    const cv = $('dd'), ro = $('ddRo');
+    let a = { x: 4, y: 2 }, b = { x: 3, y: 1 }, dragK = null;
+    const S = 22, ox = 70, oy = 150;
+    function draw() {
+      fit(cv); const cx = g2d(cv);
+      const r = cv.getBoundingClientRect();
+      cx.strokeStyle = 'rgba(32,43,60,0.1)'; cx.lineWidth = 1;
+      for (let gx = ox; gx < r.width; gx += S) {
+        cx.beginPath(); cx.moveTo(gx, 0); cx.lineTo(gx, r.height); cx.stroke();
+      }
+      for (let gy = 0; gy < r.height; gy += S) {
+        cx.beginPath(); cx.moveTo(0, gy); cx.lineTo(r.width, gy); cx.stroke();
+      }
+      const px = v => ox + v.x * S, py = v => oy - v.y * S;
+      const A = { x: px(a), y: py(a) }, B = { x: px(b), y: py(b) };
+      const bLen2 = b.x * b.x + b.y * b.y;
+      const dot = a.x * b.x + a.y * b.y;
+      let proj = { x: 0, y: 0 };
+      if (bLen2 > 0.01) {
+        const t = dot / bLen2;
+        proj = { x: ox + t * b.x * S, y: oy - t * b.y * S };
+      }
+      cx.strokeStyle = 'rgba(32,43,60,0.2)'; cx.lineWidth = 1;
+      cx.beginPath();
+      cx.moveTo(A.x, A.y); cx.lineTo(proj.x, proj.y);
+      cx.stroke();
+      drawArrow(cx, ox, oy, B.x, B.y, GREEN, 3);
+      drawArrow(cx, ox, oy, A.x, A.y, BLUE, 3);
+      cx.strokeStyle = RED; cx.lineWidth = 5; cx.lineCap = 'round';
+      cx.beginPath(); cx.moveTo(ox, oy); cx.lineTo(proj.x, proj.y); cx.stroke();
+      handle(cx, A.x, A.y, BLUE, dragK === 'a');
+      handle(cx, B.x, B.y, GREEN, dragK === 'b');
+      const lenB = Math.hypot(b.x, b.y);
+      const shadow = lenB > 0.01 ? dot / lenB : 0;
+      ro.innerHTML = '<b>A · B = ' + fmt(Math.round(dot * 10) / 10) + '</b>&nbsp; (shadow ' + fmt(Math.round(shadow * 10) / 10) + ' × length of B ' + fmt(Math.round(lenB * 10) / 10) + ')';
+    }
+    const hit = p => {
+      const A = { x: ox + a.x * S, y: oy - a.y * S }, B = { x: ox + b.x * S, y: oy - b.y * S };
+      if (Math.hypot(p.x - A.x, p.y - A.y) < 22) return 'a';
+      if (Math.hypot(p.x - B.x, p.y - B.y) < 22) return 'b';
+      return null;
+    };
+    drag(cv, hit, (k, p) => {
+      dragK = k;
+      const v = { x: clamp(Math.round(((p.x - ox) / S) * 2) / 2, -6, 6), y: clamp(Math.round(((oy - p.y) / S) * 2) / 2, -5, 5) };
+      if (k === 'a') a = v; else b = v;
+      draw();
+    });
+    redraws.push(draw);
+    draw();
+  };
+
+  const matrixDemo = () => {
+    const cv = $('md'), ro = $('mdRo');
+    let sx = 1.3, sy = 1, sh = 0.4;
+    function draw() {
+      fit(cv); const cx = g2d(cv);
+      const r = cv.getBoundingClientRect();
+      const s = clamp(Math.min((r.width - 60) / 2.6, (r.height - 60) / 2.2), 60, 150);
+      const cx0 = (r.width - (sx + sh) * s) / 2, cy0 = (r.height - sy * s) / 2;
+      const T = (x, y) => ({ x: cx0 + (sx * x + sh * y) * s, y: cy0 + sy * y * s });
+      const N = 4;
+      cx.strokeStyle = GHOST; cx.lineWidth = 1; cx.setLineDash([4, 4]);
+      cx.strokeRect(cx0, cy0, s, s);
+      cx.setLineDash([]);
+      const p0 = T(0, 0), p1 = T(1, 0), p2 = T(1, 1), p3 = T(0, 1);
+      cx.fillStyle = 'rgba(199,216,240,0.75)';
+      cx.beginPath();
+      cx.moveTo(p0.x, p0.y); cx.lineTo(p1.x, p1.y); cx.lineTo(p2.x, p2.y); cx.lineTo(p3.x, p3.y);
+      cx.closePath(); cx.fill();
+      cx.strokeStyle = BLUE; cx.lineWidth = 2;
+      cx.beginPath();
+      cx.moveTo(p0.x, p0.y); cx.lineTo(p1.x, p1.y); cx.lineTo(p2.x, p2.y); cx.lineTo(p3.x, p3.y);
+      cx.closePath(); cx.stroke();
+      cx.strokeStyle = 'rgba(46,95,163,0.4)'; cx.lineWidth = 1;
+      for (let i = 1; i < N; i++) {
+        const t = i / N;
+        const q0 = T(t, 0), q1 = T(t, 1), q2 = T(0, t), q3 = T(1, t);
+        cx.beginPath();
+        cx.moveTo(q0.x, q0.y); cx.lineTo(q1.x, q1.y);
+        cx.moveTo(q2.x, q2.y); cx.lineTo(q3.x, q3.y);
+        cx.stroke();
+      }
+      ro.innerHTML = 'area × <b>' + (Math.round(sx * sy * 100) / 100).toFixed(2) + '</b>&nbsp; (shearing sideways never changes it)';
+    }
+    bindSlider('mdS', v => { sx = v; $('mdSV').textContent = v; draw(); });
+    bindSlider('mdH', v => { sh = v; $('mdHV').textContent = v; draw(); });
+    redraws.push(draw);
+    draw();
+  };
+
+  const loopData = [
+    {
+      tag: 'beat 1 of 7', name: 'Scene', desc: 'A <b>nearly-empty diagram</b> — room to guess, nothing explained. The stage is set with almost no ink.',
+      art: '┌─┬─┬─┬─┐\n│ │ │ │ │\n├─┼─┼─┼─┤\n│ │ │ │ │\n├─┼─┼─┼─┤\n│ │ │ │ │\n└─┴─┴─┴─┘\n\nA grid, 3 tall, 4 wide.\nNot filled. Not named.\nJust room.'
+    },
+    {
+      tag: 'beat 2 of 7', name: 'Guess', desc: 'An <b>incomplete diagram</b> — one missing arrow, one blank node. &ldquo;What do you think lives here?&rdquo; Let him commit first.',
+      art: '┌─┬─┬─┬─┐\n│?│ │ │ │\n├─┼─┼─┼─┤\n│ │ │ │ │\n├─┼─┼─┼─┤\n│ │ │ │ │\n└─┴─┴─┴─┘\n\nWhat will 3 × 4\nleave in the corner?'
+    },
+    {
+      tag: 'beat 3 of 7', name: 'Struggle', desc: '<b>The same diagram, no new ink.</b> &ldquo;Good stuck. Sit with it.&rdquo; Wrong answers are golden — they show which shape he is using.',
+      art: '┌─┬─┬─┬─┐\n│?│ │ │ │\n├─┼─┼─┼─┤\n│ │ │ │ │\n├─┼─┼─┼─┤\n│ │ │ │ │\n└─┴─┴─┴─┘\n\n(Same picture. Silence.\nThe struggle does the work.)'
+    },
+    {
+      tag: 'beat 4 of 7', name: 'Guide', desc: '<b>One added constraint mark</b> — a dashed &ldquo;not this&rdquo;, a single hint. Never the answer, only a fence.',
+      art: '┌─┬─┬─┬─┐\n│▓│▓│▓│▓│\n├─┼─┼─┼─┤\n│▓│▓│▓│▓│\n├─┼─┼─┼─┤\n│▓│▓│▓│▓│\n└─┴─┴─┴─┘\n\nNot &ldquo;some&rdquo; — how much?\nCount the shape, not the rule.'
+    },
+    {
+      tag: 'beat 5 of 7', name: 'Reveal', desc: '<b>The same diagram, complete.</b> Then — and only then — the name. &ldquo;That rectangle you found? Mathematicians call it the area.&rdquo;',
+      art: '▓▓▓▓\n▓▓▓▓\n▓▓▓▓\n\n12 cells.\nOne rectangle.\nLater, a name: area.'
+    },
+    {
+      tag: 'beat 6 of 7', name: 'Break it', desc: '<b>A counterexample branch.</b> &ldquo;Can you break this shape?&rdquo; Flip one factor across zero — the rectangle flips, and the sign flips with it.',
+      art: '▓▓▓▓\n────\n░░░░\n\n3 × (−2)?\nThe same rectangle,\nflipped across the line.\nThat is the whole lesson.'
+    },
+    {
+      tag: 'beat 7 of 7', name: 'Hook', desc: '<b>One open node. One future tick.</b> A trail to follow, deliberately unfinished — so the next session starts with the hunt still on.',
+      art: '╔══╗\n║▓▓║╗\n║▓▓║║\n╚══╝╝\n\nStack the layers?\nWhat grows when\nareas multiply?'
+    }
+  ];
+
+  const loopEls = () => {
+    const dots = $('loopDots'), art = $('lsArt'), name = $('lsName'),
+          desc = $('lsDesc'), tag = $('lsTag'), count = $('loopCount');
+    let i = 0;
+    const render = () => {
+      const d = loopData[i];
+      tag.textContent = d.tag;
+      name.textContent = d.name;
+      desc.innerHTML = d.desc;
+      art.textContent = d.art;
+      count.textContent = (i + 1) + ' / 7';
+      $('loopPrev').disabled = i === 0;
+      $('loopNext').disabled = i === 6;
+      [...dots.children].forEach((b, k) => b.classList.toggle('on', k === i));
+    };
+    loopData.forEach((d, k) => {
+      const b = document.createElement('button');
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-label', d.name);
+      b.addEventListener('click', () => { i = k; render(); });
+      dots.appendChild(b);
+    });
+    $('loopPrev').addEventListener('click', () => { if (i > 0) { i--; render(); } });
+    $('loopNext').addEventListener('click', () => { if (i < 6) { i++; render(); } });
+    render();
+  };
+
+  const srcNote = [
+    '# Math Context — Private Notes',
+    '',
+    '*Only the math teacher reads this.*',
+    '',
+    '## Sessions',
+    '### Session 0 (Feb 17, 2025) — Informal',
+    '- Explored multiplication as area (rectangles)',
+    '- Showed 3×4 = area of a 3-by-4 grid',
+    '- Showed 0.5 × 4 = half a row',
+    '- Posed open question: what does 3 × (−2) look like geometrically?',
+    '- He responded with interest but we pivoted to system design before answering',
+    '',
+    '## What Clicked',
+    '- Geometry of multiplication landed immediately',
+    '- He responded "yes this is it" — ASCII diagrams + questions = the right format',
+    '',
+    '## What\u2019s Next',
+    '- Resolve: what does multiplication by a negative look like geometrically?',
+    '- Then: what does multiplication by multiplication look like? (areas of areas = higher dimensions?)',
+    '- Eventually: build toward vectors, dot products, transformation matrices — all geometrically'
+  ].join('\n');
+  const src = document.querySelector('.src');
+  const parts = srcNote.split('\n').map(l => {
+    if (l.indexOf('open question') !== -1 || l.indexOf('negative') !== -1) {
+      return '<span class="hl">' + l + '</span>';
+    }
+    return l;
+  });
+  src.innerHTML = parts.join('\n');
+
+  heroGrid();
+  gridDemo();
+  halfDemo();
+  flipLab();
+  volumeDemo();
+  vectorDemo();
+  dotDemo();
+  matrixDemo();
+  loopEls();
+
+  const io = new IntersectionObserver(es => {
+    es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.rv').forEach(el => io.observe(el));
+})();
+</script>
+</body>
+</html>
