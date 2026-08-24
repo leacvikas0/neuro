@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Wiggle vs Multiply</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; background: #fafafa; }
+  .container { display: flex; gap: 40px; }
+  .panel { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 300px; }
+  h3 { margin-top: 0; }
+  .code { font-family: monospace; background: #eee; padding: 10px; border-radius: 4px; white-space: pre-wrap; font-size: 14px; }
+  .btn { display: block; width: 100%; padding: 10px; margin-top: 10px; background: #007acc; color: white; border: none; border-radius: 4px; cursor: pointer; }
+  .btn:hover { background: #005f9e; }
+  .log { height: 150px; overflow-y: auto; background: #222; color: #0f0; font-family: monospace; padding: 10px; margin-top: 10px; font-size: 12px; }
+  .highlight { color: #ff5555; font-weight: bold; }
+</style>
+</head>
+<body>
+  <h2>Why not just Wiggle?</h2>
+  <div class="container">
+    
+    <!-- Wiggle Panel -->
+    <div class="panel">
+      <h3>Your Idea: The Wiggle</h3>
+      <p>Test a tiny move, see if Loss drops, then pick direction.</p>
+      <div class="code">
+1. run machine (output = x*y)
+2. measure loss1
+3. wiggle dial up slightly (y + 0.1)
+4. run machine again
+5. measure loss2
+6. if loss2 < loss1: direction is +
+7. if loss2 > loss1: direction is -
+      </div>
+      <button class="btn" onclick="runWiggle()">Simulate Wiggle (1 Dial)</button>
+      <button class="btn" style="background:#cc0000;" onclick="runWiggleBillion()">Simulate (1 Billion Dials)</button>
+      <div id="wiggle-log" class="log"></div>
+    </div>
+
+    <!-- Multiply Panel -->
+    <div class="panel">
+      <h3>The Math Cheat Code</h3>
+      <p>Calculate direction instantly without running the machine twice.</p>
+      <div class="code">
+1. run machine (output = x*y)
+2. measure loss
+3. <br>
+4. <br>
+5. <br>
+6. <br>
+7. direction = x * loss
+      </div>
+      <button class="btn" onclick="runMultiply()">Simulate Multiply (1 Dial)</button>
+      <button class="btn" style="background:#cc0000;" onclick="runMultiplyBillion()">Simulate (1 Billion Dials)</button>
+      <div id="multiply-log" class="log"></div>
+    </div>
+
+  </div>
+
+<script>
+  function log(id, msg) {
+    const el = document.getElementById(id);
+    el.innerHTML += msg + '<br>';
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function runWiggle() {
+    log('wiggle-log', '--- 1 Dial ---');
+    log('wiggle-log', 'Run 1: Getting baseline...');
+    log('wiggle-log', '<span class="highlight">Run 2: Testing wiggle...</span>');
+    log('wiggle-log', 'Direction found. Cost: 2 runs.');
+  }
+
+  function runWiggleBillion() {
+    log('wiggle-log', '--- 1 Billion Dials ---');
+    log('wiggle-log', 'Run 1: Getting baseline...');
+    log('wiggle-log', '<span class="highlight">Run 2: Testing Dial 1...</span>');
+    log('wiggle-log', '<span class="highlight">Run 3: Testing Dial 2...</span>');
+    log('wiggle-log', '<span class="highlight">Run 4: Testing Dial 3...</span>');
+    log('wiggle-log', '... 999,999,997 runs later ...');
+    log('wiggle-log', '<span class="highlight">Total Cost: 1,000,000,001 runs just to take ONE step.</span>');
+  }
+
+  function runMultiply() {
+    log('multiply-log', '--- 1 Dial ---');
+    log('multiply-log', 'Run 1: Getting baseline...');
+    log('multiply-log', 'Calc: Input * Loss');
+    log('multiply-log', 'Direction found. Cost: 1 run.');
+  }
+  
+  function runMultiplyBillion() {
+    log('multiply-log', '--- 1 Billion Dials ---');
+    log('multiply-log', 'Run 1: Getting baseline...');
+    log('multiply-log', 'Calc: Input * Loss (for all dials at once in memory)');
+    log('multiply-log', '<span class="highlight">Direction found. Total Cost: 1 run.</span>');
+  }
+</script>
+</body>
+</html>

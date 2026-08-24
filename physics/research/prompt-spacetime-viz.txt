@@ -1,0 +1,46 @@
+Research the best scientifically accurate ways to visualize WHY "everyone on Earth is accelerating upward" does not make Earth explode, and how spacetime curvature replaces the force of gravity. Date window: established physics through 2026. Today's date is 2026-08-20.
+
+Learner context: 21-year-old spatial thinker. He already has:
+- Equivalence principle (closed box: gravity pulling a pen down vs accelerating floor pushing up — indistinguishable locally)
+- The paradox: if the floor pushes you UP, and Earth is a sphere, why don't people on the sides/bottom fall off? Why doesn't Earth expand like a balloon at 9.8 m/s² in every direction?
+- He guessed "it's curved"
+- He has the sphere-walkers thought experiment (two people walking due north from the equator meet at the pole despite never turning)
+
+What I need, specifically:
+
+1. The PRECISE resolution of the exploding-Earth / "everyone accelerating outward" paradox. Distinguish:
+   - proper acceleration (what an accelerometer measures) vs coordinate acceleration
+   - local "up" vs a global Euclidean expansion
+   - why standing still on Earth is accelerating (you are NOT on a geodesic) while falling IS inertial
+   - why this is compatible with a sphere of constant radius
+   Do not hand-wave. Use the actual geometry.
+
+2. The best spatial metaphors that are NOT the rubber-sheet-with-bowling-ball (which sneakily uses gravity to explain gravity). Which visualizations do relativists actually recommend for this exact paradox? Include:
+   - geodesics on a 2-sphere (space curvature analog)
+   - the fact that gravity is mostly TIME curvature, not space curvature (Misner/Thorne/Wheeler, Taylor/Wheeler, Hartle, etc.)
+   - worldlines: a hovering observer's worldline is NOT geodesic; a falling observer's is
+   - Rindler wedge / uniformly accelerated observers vs Schwarzschild hovering observers
+   - tidal effects: two dropped apples converge — that's the curvature you can measure, same shape as the north-walkers meeting
+
+3. Concrete visual design that would make a spatial learner FEEL:
+   Beat A: two ants walk "straight" on a sphere, meet at a pole — no force
+   Beat B: the same two paths drawn on a flat map look like they were pulled together — fake force
+   Beat C: Earth as a sphere of people, each with a local rocket "up". The arrows do not agree on one Euclidean direction. The planet is not expanding; each person is being prevented from following their geodesic (falling).
+   Beat D: spacetime diagram (time up, space sideways): standing still is a STRAIGHT vertical line in the picture but is actually the bent/forced path; free-fall looks curved on the paper but is the "straight" geodesic. OR a better diagram if textbooks say this framing is misleading — flag that.
+   Beat E: why "direction" is local. There is no single inertial frame for the whole Earth.
+
+4. Flag common visualization mistakes that would confuse him:
+   - rubber sheet
+   - "Earth is flying upward through space"
+   - treating gravity as a force-field overlay
+   - showing spacetime as a 3D funnel you fall down into (uses gravity to explain gravity)
+   - implying Earth is expanding
+   Which of these are considered actively harmful by physicists?
+
+5. Any excellent existing interactive explanations (Aatish Bhatia, 3blue1brown, PBS Spacetime, Einstein Online, Relativity visualized, etc.) — what they get right, what they get wrong for THIS paradox.
+
+Prioritize primary sources: Einstein 1911/1916, MTW Gravitation, Hartle Gravity, Taylor & Wheeler Exploring Black Holes, Carroll Spacetime and Geometry, Schutz. Name papers, authors, books. Separate established consensus from contested popularizations.
+
+Output: a structured brief a visualization designer can build from. No equations unless they clarify a picture. Source list at the end.
+
+Write the final brief to physics/research/2026-08-20-spacetime-curvature-viz.md

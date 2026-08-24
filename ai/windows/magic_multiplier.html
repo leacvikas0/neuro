@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>The Magic Multiplier</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; background: #fafafa; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 700px; margin-bottom: 20px;}
+  .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+  .btn { padding: 10px 20px; margin: 5px; font-size: 16px; cursor: pointer; border: 2px solid #ccc; background: white; border-radius: 4px; }
+  .btn.active { border-color: #007acc; background: #e6f2ff; font-weight: bold; }
+  .result-box { background: #222; color: white; padding: 20px; border-radius: 8px; font-size: 18px; margin-top: 20px; max-width: 660px;}
+  .highlight { color: #0f0; font-weight: bold; font-size: 24px;}
+  .human-logic { color: #aaa; margin-bottom: 15px; font-size: 16px; line-height: 1.5; text-align: left; padding: 10px; border-bottom: 1px solid #444;}
+</style>
+</head>
+<body>
+  <h2>Why does Multiplication figure out the direction?</h2>
+  <p>Play with the physical state of the machine. Watch how your brain solves it, and how multiplication copies your brain perfectly.</p>
+  
+  <div class="grid">
+    <div class="box">
+      <h3>1. The Gear (Input)</h3>
+      <button class="btn active" id="in-pos" onclick="setIn(1)">Forward (+)</button>
+      <button class="btn" id="in-neg" onclick="setIn(-1)">Reverse (-)</button>
+    </div>
+    
+    <div class="box">
+      <h3>2. The Goal (Loss)</h3>
+      <button class="btn active" id="loss-pos" onclick="setLoss(1)">Output must go UP (+)</button>
+      <button class="btn" id="loss-neg" onclick="setLoss(-1)">Output must go DOWN (-)</button>
+    </div>
+  </div>
+
+  <div class="result-box">
+    <div class="human-logic" id="human-text">
+      <b>Human Brain:</b> The gear is Forward. We want Output to go UP. <br>Therefore, we must turn the dial <b>UP (+)</b>.
+    </div>
+    <div style="text-align: center;">
+      <b>Math Cheat Code:</b> Input <span id="math-in">(+)</span> &times; Loss <span id="math-loss">(+)</span> = <span class="highlight" id="math-result">Turn UP (+)</span>
+    </div>
+  </div>
+
+<script>
+  let inputState = 1;
+  let lossState = 1;
+
+  function setIn(val) {
+    inputState = val;
+    document.getElementById('in-pos').classList.toggle('active', val === 1);
+    document.getElementById('in-neg').classList.toggle('active', val === -1);
+    update();
+  }
+
+  function setLoss(val) {
+    lossState = val;
+    document.getElementById('loss-pos').classList.toggle('active', val === 1);
+    document.getElementById('loss-neg').classList.toggle('active', val === -1);
+    update();
+  }
+
+  function update() {
+    let humanText = "<b>Human Brain:</b> ";
+    let expectedDir = "";
+    
+    if (inputState === 1) {
+      humanText += "The gear is <b>Forward (+)</b>. Turning dial UP makes output go UP.<br>";
+      if (lossState === 1) {
+        humanText += "We want the Output to go <b>UP (+)</b>.<br>Therefore, we must turn the dial <b>UP (+)</b>.";
+        expectedDir = "Turn UP (+)";
+      } else {
+        humanText += "We want the Output to go <b>DOWN (-)</b>.<br>Therefore, we must turn the dial <b>DOWN (-)</b>.";
+        expectedDir = "Turn DOWN (-)";
+      }
+    } else {
+      humanText += "The gear is <b>Reverse (-)</b>. Turning dial UP makes output go DOWN.<br>";
+      if (lossState === 1) {
+        humanText += "We want the Output to go <b>UP (+)</b>.<br>Because the gear is reversed, we must turn the dial backwards to <b>DOWN (-)</b>.";
+        expectedDir = "Turn DOWN (-)";
+      } else {
+        humanText += "We want the Output to go <b>DOWN (-)</b>.<br>Because the gear is reversed, we turn the dial <b>UP (+)</b> to push output down.";
+        expectedDir = "Turn UP (+)";
+      }
+    }
+
+    document.getElementById('human-text').innerHTML = humanText;
+    document.getElementById('math-in').innerText = inputState === 1 ? "(+)" : "(-)";
+    document.getElementById('math-loss').innerText = lossState === 1 ? "(+)" : "(-)";
+    document.getElementById('math-result').innerText = expectedDir;
+  }
+  
+  update();
+</script>
+</body>
+</html>

@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python & The Dial · Line-by-Line Stepper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #090d14;
+    --panel: #101722;
+    --panel-sub: #162030;
+    --border: #1e2c40;
+    --border-glow: #2d4464;
+    --ink: #e6edf5;
+    --ink-muted: #8b9db5;
+    --ink-faint: #4e6078;
+    
+    --cyan: #38bdf8;
+    --cyan-glow: rgba(56, 189, 248, 0.25);
+    --green: #34d399;
+    --green-glow: rgba(52, 211, 153, 0.25);
+    --rose: #fb7185;
+    --rose-glow: rgba(251, 113, 133, 0.25);
+    --amber: #fbbf24;
+    --amber-glow: rgba(251, 191, 36, 0.25);
+    --purple: #c084fc;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--bg);
+    background-image: 
+      radial-gradient(1000px 500px at 50% -10%, rgba(56, 189, 248, 0.07), transparent),
+      linear-gradient(to right, rgba(30, 44, 64, 0.2) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(30, 44, 64, 0.2) 1px, transparent 1px);
+    background-size: 100% 100%, 28px 28px, 28px 28px;
+    color: var(--ink);
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    padding: 24px 16px 60px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .hand { font-family: 'Caveat', cursive; }
+
+  /* Header */
+  header {
+    max-width: 1240px;
+    width: 100%;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .title-group h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .badge {
+    background: var(--panel-sub);
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 99px;
+  }
+  .eyebrow {
+    font-family: 'Caveat', cursive;
+    color: var(--cyan);
+    font-size: 1.3rem;
+  }
+
+  /* Main Workbench Grid */
+  .workbench {
+    max-width: 1240px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 380px 1fr 340px;
+    gap: 20px;
+    align-items: stretch;
+  }
+  @media (max-width: 1100px) {
+    .workbench { grid-template-columns: 1fr; }
+  }
+
+  /* Cards */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    position: relative;
+  }
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+  }
+  .card-head h2 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--ink-muted);
+    background: var(--panel-sub);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  /* Code Panel */
+  .code-editor {
+    background: #090d14;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+  .code-line {
+    display: flex;
+    align-items: center;
+    padding: 2px 14px;
+    transition: background 0.15s ease;
+    cursor: default;
+    position: relative;
+  }
+  .code-line.active {
+    background: rgba(56, 189, 248, 0.15);
+    border-left: 3px solid var(--cyan);
+  }
+  .code-line.active::after {
+    content: '▶';
+    position: absolute;
+    right: 12px;
+    color: var(--cyan);
+    font-size: 0.75rem;
+  }
+  .line-num {
+    color: var(--ink-faint);
+    width: 28px;
+    user-select: none;
+    font-size: 0.75rem;
+  }
+  .kw { color: #f472b6; font-weight: 600; }
+  .fn { color: #60a5fa; }
+  .var { color: var(--ink); }
+  .num { color: #fbbf24; }
+  .op { color: #38bdf8; }
+  .cm { color: #4e6078; font-style: italic; }
+
+  /* Variables Inspector */
+  .var-inspector {
+    background: var(--panel-sub);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .var-item {
+    background: #090d14;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+  }
+  .var-item .name { color: var(--ink-muted); }
+  .var-item .val { font-weight: 700; color: var(--cyan); }
+  .var-item.highlight {
+    border-color: var(--cyan);
+    box-shadow: 0 0 10px var(--cyan-glow);
+  }
+
+  /* Physical Signal Flow SVG */
+  .machine-container {
+    background: #090d14;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    min-height: 380px;
+  }
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Controls */
+  .control-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    background: var(--panel-sub);
+    color: var(--ink);
+    border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 9px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 0 10px var(--cyan-glow);
+  }
+  .btn.primary {
+    background: var(--cyan);
+    color: #090d14;
+    border-color: var(--cyan);
+  }
+  .btn.primary:hover {
+    background: #7dd3fc;
+    color: #090d14;
+  }
+  .btn.active {
+    border-color: var(--green);
+    color: var(--green);
+    background: rgba(52, 211, 153, 0.1);
+  }
+
+  /* Sliders */
+  .slider-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .slider-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: #090d14;
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--cyan);
+    border: 2px solid #fff;
+    cursor: grab;
+  }
+
+  /* Right Log / Parabola Canvas */
+  canvas {
+    background: #090d14;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 100%;
+    height: 180px;
+  }
+
+  .step-log {
+    background: #090d14;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    max-height: 160px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 4px;
+  }
+  .log-entry {
+    color: var(--ink-muted);
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+    padding-bottom: 3px;
+  }
+  .log-entry b { color: var(--cyan); }
+
+  /* Explanation Callout */
+  .callout {
+    background: rgba(56, 189, 248, 0.06);
+    border-left: 3px solid var(--cyan);
+    padding: 12px 14px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+    line-height: 1.5;
+  }
+  .callout b { color: var(--ink); }
+
+  /* Pulse animation on wires */
+  @keyframes flowPulse {
+    0% { stroke-dashoffset: 20; }
+    100% { stroke-dashoffset: 0; }
+  }
+  .active-wire {
+    stroke: var(--cyan) !important;
+    stroke-width: 3 !important;
+    stroke-dasharray: 6 3;
+    animation: flowPulse 0.4s linear infinite;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-group">
+    <span class="eyebrow">Interactive Code-to-Physics Stepper</span>
+    <h1>Python & The Dial <span class="badge">STEP-BY-STEP</span></h1>
+  </div>
+  <div class="control-bar">
+    <button class="btn primary" id="btn-step-line">▶ Step Next Line (F10)</button>
+    <button class="btn" id="btn-step-loop">⏩ Full Loop Step</button>
+    <button class="btn" id="btn-auto">⚡ Auto Run</button>
+    <button class="btn" id="btn-reset">↺ Reset</button>
+  </div>
+</header>
+
+<div class="workbench">
+
+  <!-- ========================================= -->
+  <!-- COLUMN 1: LIVE PYTHON CODE & VARIABLES   -->
+  <!-- ========================================= -->
+  <div class="card">
+    <div class="card-head">
+      <h2><span>🐍</span> Python Execution</h2>
+      <span class="tag" id="exec-status">READY</span>
+    </div>
+
+    <!-- Code Display -->
+    <div class="code-editor" id="code-box">
+      <div class="code-line" id="line-1"><span class="line-num">1</span><span class="var">x</span> <span class="op">=</span> <span class="num" id="code-in-val">2.0</span></div>
+      <div class="code-line" id="line-2"><span class="line-num">2</span><span class="var">target</span> <span class="op">=</span> <span class="num">10.0</span></div>
+      <div class="code-line" id="line-3"><span class="line-num">3</span><span class="var">step_size</span> <span class="op">=</span> <span class="num" id="code-step-val">0.10</span></div>
+      <div class="code-line" id="line-4"><span class="line-num">4</span><span class="var">w</span> <span class="op">=</span> <span class="num" id="code-w-val">9.00</span> <span class="cm"># starting dial</span></div>
+      <div class="code-line" id="line-5"><span class="line-num">5</span><span class="kw">while</span> <span class="fn">abs</span>(<span class="var">target</span> <span class="op">-</span> <span class="var">w</span><span class="op">*</span><span class="var">x</span>) <span class="op">&gt;</span> <span class="num">0.01</span>:</div>
+      <div class="code-line" id="line-6"><span class="line-num">6</span>  <span class="var">out</span> <span class="op">=</span> <span class="var">x</span> <span class="op">*</span> <span class="var">w</span> <span class="cm"># 1. Forward Pass</span></div>
+      <div class="code-line" id="line-7"><span class="line-num">7</span>  <span class="var">gap</span> <span class="op">=</span> <span class="var">target</span> <span class="op">-</span> <span class="var">out</span> <span class="cm"># 2. Error Vector</span></div>
+      <div class="code-line" id="line-8"><span class="line-num">8</span>  <span class="var">w</span> <span class="op">=</span> <span class="var">w</span> <span class="op">+</span> <span class="var">step_size</span> <span class="op">*</span> <span class="var">gap</span> <span class="cm"># 3. Nudge</span></div>
+    </div>
+
+    <!-- Live Variable State -->
+    <div class="var-inspector">
+      <div class="var-item" id="box-v-w"><span class="name">w</span><span class="val" id="v-w">9.00</span></div>
+      <div class="var-item" id="box-v-out"><span class="name">out</span><span class="val" id="v-out">18.00</span></div>
+      <div class="var-item" id="box-v-gap"><span class="name">gap</span><span class="val" id="v-gap">-8.00</span></div>
+      <div class="var-item" id="box-v-loss"><span class="name">loss</span><span class="val" id="v-loss">64.00</span></div>
+    </div>
+
+    <!-- Parameter Sliders -->
+    <div class="slider-row">
+      <div class="slider-label">
+        <span class="mono">Initial Dial (w₀):</span>
+        <span class="mono" style="color:var(--green);" id="val-init-w">9.0</span>
+      </div>
+      <input type="range" id="slider-init-w" min="0" max="10" step="0.5" value="9.0">
+    </div>
+
+    <div class="slider-row">
+      <div class="slider-label">
+        <span class="mono">Step Size (step_size):</span>
+        <span class="mono" style="color:var(--cyan);" id="val-step-size">0.10</span>
+      </div>
+      <input type="range" id="slider-step-size" min="0.02" max="0.95" step="0.01" value="0.10">
+    </div>
+
+    <div class="callout" id="action-explainer">
+      <b>What Python does on this line:</b><br>
+      Press <b>Step Next Line</b> to see the electrical signal pulse from input through the dial into output.
+    </div>
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- COLUMN 2: PHYSICAL MACHINE & NUMBER LINE -->
+  <!-- ========================================= -->
+  <div class="card">
+    <div class="card-head">
+      <h2><span>⚡</span> The Physical Mechanism</h2>
+      <span class="tag">SIGNAL & ELASTIC TENSION</span>
+    </div>
+
+    <div class="machine-container">
+      <svg id="svg-stage" viewBox="0 0 460 360">
+        <defs>
+          <marker id="m-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="#38bdf8"/>
+          </marker>
+        </defs>
+
+        <!-- Input Box -->
+        <g transform="translate(30, 50)">
+          <rect x="0" y="0" width="70" height="56" rx="8" fill="#162030" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="35" y="22" text-anchor="middle" fill="#8b9db5" font-size="10" font-family="JetBrains Mono">INPUT (x)</text>
+          <text x="35" y="44" text-anchor="middle" fill="#38bdf8" font-size="18" font-family="JetBrains Mono" font-weight="700">2.0</text>
+        </g>
+
+        <!-- Wire Input -> Dial -->
+        <line id="wire-in" x1="100" y1="78" x2="160" y2="78" stroke="#1e2c40" stroke-width="3" marker-end="url(#m-arr)"/>
+
+        <!-- Dial Group -->
+        <g transform="translate(225, 78)">
+          <circle cx="0" cy="0" r="50" fill="#162030" stroke="#34d399" stroke-width="2" stroke-dasharray="3 2"/>
+          <circle cx="0" cy="0" r="40" fill="#101722" stroke="#1e2c40" stroke-width="2"/>
+          <!-- Needle -->
+          <line id="svg-needle" x1="0" y1="0" x2="0" y2="-34" stroke="#34d399" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="0" cy="0" r="6" fill="#34d399"/>
+          <text x="0" y="20" text-anchor="middle" fill="#8b9db5" font-size="9" font-family="JetBrains Mono">DIAL w</text>
+          <text id="svg-w-display" x="0" y="68" text-anchor="middle" fill="#34d399" font-size="15" font-family="JetBrains Mono" font-weight="700">w = 9.00</text>
+        </g>
+
+        <!-- Wire Dial -> Output -->
+        <line id="wire-out" x1="280" y1="78" x2="340" y2="78" stroke="#1e2c40" stroke-width="3" marker-end="url(#m-arr)"/>
+
+        <!-- Output Box -->
+        <g transform="translate(345, 50)">
+          <rect x="0" y="0" width="85" height="56" rx="8" fill="#162030" stroke="#fb7185" stroke-width="1.5"/>
+          <text x="42" y="22" text-anchor="middle" fill="#8b9db5" font-size="10" font-family="JetBrains Mono">OUTPUT</text>
+          <text id="svg-out-display" x="42" y="44" text-anchor="middle" fill="#fb7185" font-size="18" font-family="JetBrains Mono" font-weight="700">18.00</text>
+        </g>
+
+        <!-- Truth Box (Below Output) -->
+        <g transform="translate(345, 126)">
+          <rect x="0" y="0" width="85" height="46" rx="8" fill="#162030" stroke="#fbbf24" stroke-width="1.5"/>
+          <text x="42" y="18" text-anchor="middle" fill="#8b9db5" font-size="9" font-family="JetBrains Mono">TRUTH (y)</text>
+          <text x="42" y="38" text-anchor="middle" fill="#fbbf24" font-size="16" font-family="JetBrains Mono" font-weight="700">10.0</text>
+        </g>
+
+        <!-- Feedback Wire Gap -> Dial (Nudge Path) -->
+        <path id="wire-feedback" d="M 387 180 L 387 210 L 225 210 L 225 140" fill="none" stroke="#1e2c40" stroke-width="2.5" marker-end="url(#m-arr)"/>
+        <text x="310" y="202" fill="#fb7185" font-size="10" font-family="JetBrains Mono" text-anchor="middle">gap feedback</text>
+
+        <!-- Number Line Vector Space (Bottom) -->
+        <g transform="translate(25, 275)">
+          <line x1="0" y1="0" x2="410" y2="0" stroke="#2d4464" stroke-width="2"/>
+          <!-- Ticks -->
+          <line x1="0" y1="-5" x2="0" y2="5" stroke="#4e6078" stroke-width="1.5"/>
+          <text x="0" y="18" fill="#4e6078" font-size="9" font-family="JetBrains Mono" text-anchor="middle">0</text>
+          <line x1="205" y1="-5" x2="205" y2="5" stroke="#4e6078" stroke-width="1.5"/>
+          <text x="205" y="18" fill="#fbbf24" font-size="9" font-family="JetBrains Mono" text-anchor="middle">10 (Target)</text>
+          <line x1="410" y1="-5" x2="410" y2="5" stroke="#4e6078" stroke-width="1.5"/>
+          <text x="410" y="18" fill="#4e6078" font-size="9" font-family="JetBrains Mono" text-anchor="middle">20</text>
+
+          <!-- Pins -->
+          <circle cx="205" cy="0" r="6" fill="#fbbf24"/>
+          <circle id="svg-pin-out" cx="369" cy="0" r="6" fill="#fb7185"/>
+
+          <!-- Elastic Gap Band -->
+          <line id="svg-gap-band" x1="205" y1="-14" x2="369" y2="-14" stroke="#fb7185" stroke-width="3" stroke-dasharray="3 3"/>
+          <text id="svg-gap-text" x="287" y="-22" fill="#fb7185" font-size="11" font-family="JetBrains Mono" text-anchor="middle">gap = -8.00</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- COLUMN 3: LOSS PARABOLA & STEP LOG       -->
+  <!-- ========================================= -->
+  <div class="card">
+    <div class="card-head">
+      <h2><span>📉</span> Loss Terrain</h2>
+      <span class="tag">PARABOLA TRAIL</span>
+    </div>
+
+    <!-- Parabola Canvas -->
+    <canvas id="miniParabola" width="300" height="180"></canvas>
+
+    <div class="card-head" style="margin-top: 4px; padding-top: 8px;">
+      <h2><span>📋</span> Execution Log</h2>
+      <span class="tag" id="loop-counter">STEP 0</span>
+    </div>
+
+    <!-- Step Log -->
+    <div class="step-log" id="log-box">
+      <div class="log-entry">Machine initialized. Ready to step.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================================
+   STATE & CONSTANTS
+   ========================================================================= */
+const INPUT_X = 2.0;
+const TARGET_Y = 10.0;
+let currentW = 9.0;
+let stepSize = 0.10;
+let currentOut = currentW * INPUT_X;
+let currentGap = TARGET_Y - currentOut;
+let currentLoss = currentGap * currentGap;
+
+// Stepper Line Pointer (6 = Forward, 7 = Gap, 8 = Nudge)
+let currentLineIndex = 6; 
+let stepCount = 0;
+let autoTimer = null;
+let trail = [{ w: 9.0, loss: 64.0 }];
+
+/* =========================================================================
+   DOM ELEMENTS
+   ========================================================================= */
+const btnStepLine = document.getElementById('btn-step-line');
+const btnStepLoop = document.getElementById('btn-step-loop');
+const btnAuto = document.getElementById('btn-auto');
+const btnReset = document.getElementById('btn-reset');
+
+const sliderInitW = document.getElementById('slider-init-w');
+const valInitW = document.getElementById('val-init-w');
+const sliderStepSize = document.getElementById('slider-step-size');
+const valStepSize = document.getElementById('val-step-size');
+
+const codeWVal = document.getElementById('code-w-val');
+const codeStepVal = document.getElementById('code-step-val');
+const execStatus = document.getElementById('exec-status');
+const actionExplainer = document.getElementById('action-explainer');
+const loopCounter = document.getElementById('loop-counter');
+const logBox = document.getElementById('log-box');
+
+// Variable boxes
+const vW = document.getElementById('v-w');
+const vOut = document.getElementById('v-out');
+const vGap = document.getElementById('v-gap');
+const vLoss = document.getElementById('v-loss');
+
+// SVG elements
+const svgNeedle = document.getElementById('svg-needle');
+const svgWDisplay = document.getElementById('svg-w-display');
+const svgOutDisplay = document.getElementById('svg-out-display');
+const svgPinOut = document.getElementById('svg-pin-out');
+const svgGapBand = document.getElementById('svg-gap-band');
+const svgGapText = document.getElementById('svg-gap-text');
+
+const wireIn = document.getElementById('wire-in');
+const wireOut = document.getElementById('wire-out');
+const wireFeedback = document.getElementById('wire-feedback');
+
+// Parabola Canvas
+const canvas = document.getElementById('miniParabola');
+const ctx = canvas.getContext('2d');
+
+/* =========================================================================
+   LINE HIGHLIGHTING & MACHINE UPDATES
+   ========================================================================= */
+function highlightLine(lineNum) {
+  for (let i = 1; i <= 8; i++) {
+    const el = document.getElementById(`line-${i}`);
+    if (el) el.classList.remove('active');
+  }
+  const activeEl = document.getElementById(`line-${lineNum}`);
+  if (activeEl) activeEl.classList.add('active');
+
+  // Reset wire pulses
+  wireIn.classList.remove('active-wire');
+  wireOut.classList.remove('active-wire');
+  wireFeedback.classList.remove('active-wire');
+}
+
+function updateVisuals() {
+  vW.textContent = currentW.toFixed(2);
+  vOut.textContent = currentOut.toFixed(2);
+  vGap.textContent = (currentGap > 0 ? '+' : '') + currentGap.toFixed(2);
+  vLoss.textContent = currentLoss.toFixed(2);
+
+  svgWDisplay.textContent = `w = ${currentW.toFixed(2)}`;
+  svgOutDisplay.textContent = currentOut.toFixed(2);
+  codeWVal.textContent = currentW.toFixed(2);
+
+  // Rotate Needle (-135 to +135 deg for w in 0..10)
+  const deg = -135 + (Math.min(10, Math.max(0, currentW)) / 10) * 270;
+  const rad = deg * Math.PI / 180;
+  svgNeedle.setAttribute('x2', 34 * Math.sin(rad));
+  svgNeedle.setAttribute('y2', -34 * Math.cos(rad));
+
+  // Number Line Pin (0 -> 0px, 20 -> 410px)
+  const clampedOut = Math.max(0, Math.min(20, currentOut));
+  const pinX = (clampedOut / 20) * 410;
+  svgPinOut.setAttribute('cx', pinX);
+
+  // Elastic Gap Band
+  svgGapBand.setAttribute('x2', pinX);
+  const midX = (205 + pinX) / 2;
+  svgGapText.setAttribute('x', midX);
+  svgGapText.textContent = `gap = ${(currentGap > 0 ? '+' : '') + currentGap.toFixed(2)}`;
+
+  drawParabola();
+}
+
+function drawParabola() {
+  const W = canvas.width;
+  const H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const padX = 25;
+  const padY = 20;
+  const mapX = (w) => padX + (w / 10) * (W - 2 * padX);
+  const mapY = (l) => H - padY - (Math.min(l, 80) / 80) * (H - 2 * padY);
+
+  // Ground curve
+  ctx.strokeStyle = '#1e2c40';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let x = 0; x <= 10; x += 0.2) {
+    const l = Math.pow(TARGET_Y - x * INPUT_X, 2);
+    const px = mapX(x);
+    const py = mapY(l);
+    if (x === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+
+  // Trail
+  for (let i = 0; i < trail.length - 1; i++) {
+    const p1 = trail[i];
+    const p2 = trail[i + 1];
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(mapX(p1.w), mapY(p1.loss));
+    ctx.lineTo(mapX(p2.w), mapY(p2.loss));
+    ctx.stroke();
+  }
+
+  // Current Point
+  const curX = mapX(currentW);
+  const curY = mapY(currentLoss);
+  ctx.fillStyle = '#34d399';
+  ctx.shadowColor = '#34d399';
+  ctx.shadowBlur = 10;
+  ctx.beginPath();
+  ctx.arc(curX, curY, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+}
+
+function addLog(msg) {
+  const div = document.createElement('div');
+  div.className = 'log-entry';
+  div.innerHTML = msg;
+  logBox.prepend(div);
+}
+
+/* =========================================================================
+   STEPPER LOGIC
+   ========================================================================= */
+function executeNextLine() {
+  highlightLine(currentLineIndex);
+
+  if (currentLineIndex === 6) {
+    // Line 6: out = x * w
+    execStatus.textContent = 'LINE 6: FORWARD PASS';
+    wireIn.classList.add('active-wire');
+    wireOut.classList.add('active-wire');
+    
+    currentOut = INPUT_X * currentW;
+    actionExplainer.innerHTML = `<b>Line 6 (out = x * w):</b> Input <span class="mono">${INPUT_X}</span> passes through dial <span class="mono">${currentW.toFixed(2)}</span>. Output computes to <span class="mono" style="color:var(--rose);">${currentOut.toFixed(2)}</span>.`;
+    addLog(`[Line 6] <span class="mono">out = 2.0 × ${currentW.toFixed(2)} = <b>${currentOut.toFixed(2)}</b></span>`);
+    
+    currentLineIndex = 7;
+  } 
+  else if (currentLineIndex === 7) {
+    // Line 7: gap = target - out
+    execStatus.textContent = 'LINE 7: ERROR MEASUREMENT';
+    
+    currentGap = TARGET_Y - currentOut;
+    currentLoss = currentGap * currentGap;
+    
+    actionExplainer.innerHTML = `<b>Line 7 (gap = target - out):</b> Truth is <span class="mono">10.0</span>. Gap is <span class="mono" style="color:var(--rose);">${(currentGap > 0 ? '+' : '') + currentGap.toFixed(2)}</span>. The negative sign commands a <i>leftward</i> dial turn.`;
+    addLog(`[Line 7] <span class="mono">gap = 10.0 − ${currentOut.toFixed(2)} = <b>${(currentGap > 0 ? '+' : '') + currentGap.toFixed(2)}</b></span>`);
+    
+    currentLineIndex = 8;
+  } 
+  else if (currentLineIndex === 8) {
+    // Line 8: w = w + step_size * gap
+    execStatus.textContent = 'LINE 8: NUDGE DIAL';
+    wireFeedback.classList.add('active-wire');
+    
+    const nudgeAmount = stepSize * currentGap;
+    const oldW = currentW;
+    currentW = currentW + nudgeAmount;
+    stepCount++;
+    loopCounter.textContent = `STEP ${stepCount}`;
+    
+    trail.push({ w: currentW, loss: currentLoss });
+    actionExplainer.innerHTML = `<b>Line 8 (w = w + step * gap):</b> Dial turned from <span class="mono">${oldW.toFixed(2)}</span> to <span class="mono" style="color:var(--green);">${currentW.toFixed(2)}</span> (nudged by <span class="mono">${(nudgeAmount > 0 ? '+' : '') + nudgeAmount.toFixed(2)}</span>).`;
+    addLog(`[Line 8] <span class="mono">w = ${oldW.toFixed(2)} + (${stepSize.toFixed(2)} × ${currentGap.toFixed(2)}) = <b>${currentW.toFixed(2)}</b></span>`);
+    
+    // Check if loop completes
+    if (Math.abs(currentGap) < 0.05) {
+      execStatus.textContent = 'CONVERGED (gap ≈ 0)';
+      actionExplainer.innerHTML = `🎉 <b>Loop Finished:</b> Dial reached <span class="mono" style="color:var(--green);">w = ${currentW.toFixed(2)}</span>! Loss is zero.`;
+      stopAuto();
+    }
+    
+    currentLineIndex = 6; // Loop back
+  }
+
+  updateVisuals();
+}
+
+function executeFullLoop() {
+  executeNextLine(); // 6
+  setTimeout(() => {
+    executeNextLine(); // 7
+    setTimeout(() => {
+      executeNextLine(); // 8
+    }, 180);
+  }, 180);
+}
+
+/* =========================================================================
+   CONTROLS & EVENTS
+   ========================================================================= */
+btnStepLine.addEventListener('click', () => {
+  stopAuto();
+  executeNextLine();
+});
+
+btnStepLoop.addEventListener('click', () => {
+  stopAuto();
+  executeFullLoop();
+});
+
+btnAuto.addEventListener('click', () => {
+  if (autoTimer) {
+    stopAuto();
+  } else {
+    btnAuto.classList.add('active');
+    btnAuto.textContent = '⏸ Pause';
+    autoTimer = setInterval(() => {
+      if (Math.abs(TARGET_Y - INPUT_X * currentW) < 0.05 || stepCount > 60) {
+        stopAuto();
+        return;
+      }
+      executeNextLine();
+    }, 240);
+  }
+});
+
+function stopAuto() {
+  if (autoTimer) {
+    clearInterval(autoTimer);
+    autoTimer = null;
+  }
+  btnAuto.classList.remove('active');
+  btnAuto.textContent = '⚡ Auto Run';
+}
+
+function resetMachine() {
+  stopAuto();
+  currentW = parseFloat(sliderInitW.value);
+  stepSize = parseFloat(sliderStepSize.value);
+  currentOut = currentW * INPUT_X;
+  currentGap = TARGET_Y - currentOut;
+  currentLoss = currentGap * currentGap;
+  currentLineIndex = 6;
+  stepCount = 0;
+  trail = [{ w: currentW, loss: currentLoss }];
+  
+  loopCounter.textContent = 'STEP 0';
+  execStatus.textContent = 'READY';
+  logBox.innerHTML = '<div class="log-entry">Machine reset. Ready to step.</div>';
+  actionExplainer.innerHTML = '<b>Machine reset:</b> Press <b>Step Next Line</b> to begin execution.';
+  
+  highlightLine(6);
+  updateVisuals();
+}
+
+btnReset.addEventListener('click', resetMachine);
+
+sliderInitW.addEventListener('input', (e) => {
+  valInitW.textContent = parseFloat(e.target.value).toFixed(1);
+  resetMachine();
+});
+
+sliderStepSize.addEventListener('input', (e) => {
+  stepSize = parseFloat(e.target.value);
+  valStepSize.textContent = stepSize.toFixed(2);
+  codeStepVal.textContent = stepSize.toFixed(2);
+});
+
+// Keyboard shortcut: F10 for step, F5 for loop
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'F10') {
+    e.preventDefault();
+    btnStepLine.click();
+  } else if (e.key === 'F5') {
+    e.preventDefault();
+    btnStepLoop.click();
+  }
+});
+
+// Init
+highlightLine(6);
+updateVisuals();
+</script>
+
+</body>
+</html>

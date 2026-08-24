@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Dial & The Bowl · Visualizing Machine Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<!-- Three.js for 3D Loss Surface -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<style>
+  :root {
+    --bg: #090d13;
+    --panel: #111823;
+    --panel-sub: #172232;
+    --border: #1e2d42;
+    --border-bright: #2f4565;
+    --ink: #e6edf5;
+    --ink-muted: #8b9bb0;
+    --ink-faint: #4e5f76;
+    
+    --cyan: #38bdf8;
+    --cyan-glow: rgba(56, 189, 248, 0.25);
+    --green: #34d399;
+    --green-glow: rgba(52, 211, 153, 0.25);
+    --rose: #fb7185;
+    --rose-glow: rgba(251, 113, 133, 0.25);
+    --amber: #fbbf24;
+    --amber-glow: rgba(251, 191, 36, 0.25);
+    --purple: #a78bfa;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--bg);
+    background-image: 
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.08), transparent),
+      linear-gradient(to right, rgba(30, 45, 66, 0.25) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(30, 45, 66, 0.25) 1px, transparent 1px);
+    background-size: 100% 100%, 32px 32px, 32px 32px;
+    color: var(--ink);
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    line-height: 1.6;
+    padding-bottom: 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .hand { font-family: 'Caveat', cursive; }
+
+  /* Navigation */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(9, 13, 19, 0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+  .nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+  }
+  .badge {
+    background: var(--panel-sub);
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .nav-tabs {
+    display: flex;
+    gap: 8px;
+    list-style: none;
+  }
+  .nav-tabs a {
+    color: var(--ink-muted);
+    text-decoration: none;
+    font-size: 0.82rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .nav-tabs a:hover {
+    color: var(--ink);
+    background: var(--panel-sub);
+  }
+  .nav-tabs a.active {
+    color: var(--cyan);
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+  }
+
+  /* Layout Container */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+
+  /* Hero Banner */
+  .hero {
+    text-align: center;
+    padding: 30px 20px 10px;
+  }
+  .hero .eyebrow {
+    font-family: 'Caveat', cursive;
+    font-size: 1.6rem;
+    color: var(--cyan);
+    margin-bottom: 6px;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin-bottom: 12px;
+  }
+  .hero p {
+    color: var(--ink-muted);
+    max-width: 680px;
+    margin: 0 auto;
+    font-size: 1.05rem;
+  }
+
+  /* Cards & Sections */
+  .section-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    position: relative;
+    overflow: hidden;
+  }
+  .section-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .card-title-group h2 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-title-group p {
+    color: var(--ink-muted);
+    font-size: 0.9rem;
+    margin-top: 4px;
+  }
+  .pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    border-radius: 99px;
+    background: var(--panel-sub);
+    border: 1px solid var(--border-bright);
+    color: var(--ink-muted);
+  }
+
+  /* Grid Layouts */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: center;
+  }
+  @media (max-width: 860px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .nav-tabs { display: none; }
+  }
+
+  /* Controls and Readouts */
+  .control-group {
+    background: var(--panel-sub);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .label-val {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 6px;
+    font-size: 0.88rem;
+  }
+  .label-val .val {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+  }
+
+  /* Sliders */
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    background: #090d13;
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--cyan);
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px var(--cyan-glow);
+    cursor: grab;
+    transition: transform 0.1s ease;
+  }
+  input[type=range]::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    transform: scale(1.2);
+  }
+
+  /* Buttons */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    background: var(--panel);
+    color: var(--ink);
+    border: 1px solid var(--border-bright);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 0 12px var(--cyan-glow);
+  }
+  .btn.primary {
+    background: var(--cyan);
+    color: #090d13;
+    border-color: var(--cyan);
+  }
+  .btn.primary:hover {
+    background: #7dd3fc;
+    color: #090d13;
+  }
+  .btn.active {
+    border-color: var(--green);
+    color: var(--green);
+    background: rgba(52, 211, 153, 0.1);
+  }
+
+  /* Stat Readout Boxes */
+  .readout-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 12px;
+  }
+  .stat-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    text-align: center;
+  }
+  .stat-box .title {
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .stat-box .number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-top: 4px;
+    display: block;
+  }
+
+  /* Canvases and SVG */
+  .visual-canvas-container {
+    background: #090d13;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    min-height: 340px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hint-overlay {
+    position: absolute;
+    bottom: 12px;
+    right: 14px;
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--ink-faint);
+    pointer-events: none;
+    background: rgba(9, 13, 19, 0.8);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  /* Annotation Callout */
+  .callout {
+    background: rgba(56, 189, 248, 0.05);
+    border-left: 3px solid var(--cyan);
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.9rem;
+    color: var(--ink-muted);
+    margin-top: 14px;
+  }
+  .callout b { color: var(--ink); }
+
+  /* Colors */
+  .c-cyan { color: var(--cyan); }
+  .c-green { color: var(--green); }
+  .c-rose { color: var(--rose); }
+  .c-amber { color: var(--amber); }
+  .c-purple { color: var(--purple); }
+</style>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav>
+  <div class="nav-inner">
+    <div class="logo">
+      <span>AI LAB</span>
+      <span class="badge">SESSION VISUALIZER</span>
+    </div>
+    <ul class="nav-tabs">
+      <li><a href="#sec-dial" class="active">1. The Dial & Number Line</a></li>
+      <li><a href="#sec-3d">2. 3D Loss Bowl</a></li>
+      <li><a href="#sec-slope">3. The Tangent Slope</a></li>
+      <li><a href="#sec-loop">4. The Learning Loop</a></li>
+      <li><a href="#sec-2d-terrain">5. 2-Weight Valley</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- Hero Header -->
+  <div class="hero">
+    <div class="eyebrow">From physical intuition to optimization geometry</div>
+    <h1>The Dial, The Gap & The 3D Bowl</h1>
+    <p>We built the simplest machine that could learn: <span class="mono c-cyan">out = in × w</span>. Below are 5 spatial perspectives showing how the dial senses error, traverses the 3D loss surface, and finds truth.</p>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 1. THE DIAL & THE ELASTIC NUMBER LINE     -->
+  <!-- ========================================== -->
+  <section id="sec-dial" class="section-card">
+    <div class="card-header">
+      <div class="card-title-group">
+        <h2><span>01</span> The Machine & Number Line Transformation</h2>
+        <p>Input <span class="mono c-cyan">x = 2</span> is transformed by dial <span class="mono c-green">w</span>. Watch the output vector stretch and the elastic gap pull back.</p>
+      </div>
+      <span class="pill">1D VECTOR STRETCH</span>
+    </div>
+
+    <div class="grid-2">
+      <!-- Left: Interactive SVG Machine & Vector Line -->
+      <div class="visual-canvas-container" style="padding: 10px;">
+        <svg id="svg-machine" viewBox="0 0 500 320" style="width: 100%; height: auto;">
+          <defs>
+            <marker id="arr-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="#38bdf8"/>
+            </marker>
+            <marker id="arr-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="#34d399"/>
+            </marker>
+          </defs>
+
+          <!-- Dial Node -->
+          <g transform="translate(140, 90)">
+            <circle cx="0" cy="0" r="54" fill="#172232" stroke="#34d399" stroke-width="2" stroke-dasharray="4 2"/>
+            <circle cx="0" cy="0" r="44" fill="#111823" stroke="#1e2d42" stroke-width="2"/>
+            <!-- Needle -->
+            <line id="dial-needle" x1="0" y1="0" x2="0" y2="-38" stroke="#34d399" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="0" cy="0" r="6" fill="#34d399"/>
+            <text x="0" y="24" text-anchor="middle" fill="#8b9bb0" font-size="10" font-family="JetBrains Mono">DIAL (w)</text>
+            <text id="dial-text-val" x="0" y="76" text-anchor="middle" fill="#34d399" font-size="16" font-family="JetBrains Mono" font-weight="700">w = 9.00</text>
+          </g>
+
+          <!-- Input Box -->
+          <rect x="20" y="65" width="60" height="50" rx="8" fill="#172232" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="50" y="85" text-anchor="middle" fill="#8b9bb0" font-size="9" font-family="JetBrains Mono">INPUT x</text>
+          <text x="50" y="104" text-anchor="middle" fill="#38bdf8" font-size="16" font-family="JetBrains Mono" font-weight="700">2.0</text>
+          <line x1="80" y1="90" x2="86" y2="90" stroke="#38bdf8" stroke-width="2" marker-end="url(#arr-c)"/>
+
+          <!-- Multiplication symbol -->
+          <text x="212" y="96" fill="#8b9bb0" font-size="18" font-weight="bold">×</text>
+
+          <!-- Output Box -->
+          <rect x="245" y="65" width="80" height="50" rx="8" fill="#172232" stroke="#fb7185" stroke-width="1.5"/>
+          <text x="285" y="85" text-anchor="middle" fill="#8b9bb0" font-size="9" font-family="JetBrains Mono">OUTPUT</text>
+          <text id="svg-out-val" x="285" y="104" text-anchor="middle" fill="#fb7185" font-size="16" font-family="JetBrains Mono" font-weight="700">18.00</text>
+
+          <!-- Target Box -->
+          <rect x="365" y="65" width="80" height="50" rx="8" fill="#172232" stroke="#fbbf24" stroke-width="1.5"/>
+          <text x="405" y="85" text-anchor="middle" fill="#8b9bb0" font-size="9" font-family="JetBrains Mono">TRUTH (y)</text>
+          <text x="405" y="104" text-anchor="middle" fill="#fbbf24" font-size="16" font-family="JetBrains Mono" font-weight="700">10.0</text>
+
+          <!-- Number Line Axis (Bottom) -->
+          <g transform="translate(40, 230)">
+            <line x1="0" y1="0" x2="420" y2="0" stroke="#2f4565" stroke-width="2"/>
+            <!-- Ticks -->
+            <line x1="0" y1="-6" x2="0" y2="6" stroke="#4e5f76" stroke-width="2"/>
+            <text x="0" y="20" fill="#4e5f76" font-size="10" font-family="JetBrains Mono" text-anchor="middle">0</text>
+            <line x1="210" y1="-6" x2="210" y2="6" stroke="#4e5f76" stroke-width="2"/>
+            <text x="210" y="20" fill="#4e5f76" font-size="10" font-family="JetBrains Mono" text-anchor="middle">10 (Target)</text>
+            <line x1="420" y1="-6" x2="420" y2="6" stroke="#4e5f76" stroke-width="2"/>
+            <text x="420" y="20" fill="#4e5f76" font-size="10" font-family="JetBrains Mono" text-anchor="middle">20</text>
+
+            <!-- Target Pin -->
+            <circle cx="210" cy="0" r="7" fill="#fbbf24"/>
+            <!-- Output Pin -->
+            <circle id="numline-out-pin" cx="378" cy="0" r="7" fill="#fb7185"/>
+
+            <!-- Elastic Spring / Gap Line -->
+            <line id="numline-gap-spring" x1="210" y1="-14" x2="378" y2="-14" stroke="#fb7185" stroke-width="3" stroke-dasharray="4 3"/>
+            <text id="numline-gap-label" x="294" y="-22" fill="#fb7185" font-size="11" font-family="JetBrains Mono" text-anchor="middle">Gap: -8.00</text>
+          </g>
+        </svg>
+        <div class="hint-overlay">Turn slider on the right</div>
+      </div>
+
+      <!-- Right: Control Panel & Intuition -->
+      <div class="control-group">
+        <div>
+          <div class="label-val">
+            <span class="mono">Weight Dial (w):</span>
+            <span class="val c-green" id="val-sec1-w">9.00</span>
+          </div>
+          <input type="range" id="slider-sec1-w" min="0" max="10" step="0.05" value="9.00">
+        </div>
+
+        <div class="readout-grid">
+          <div class="stat-box">
+            <div class="title">Output</div>
+            <span class="number c-rose" id="val-sec1-out">18.00</span>
+          </div>
+          <div class="stat-box">
+            <div class="title">Target Truth</div>
+            <span class="number c-amber">10.00</span>
+          </div>
+          <div class="stat-box">
+            <div class="title">Gap (y - out)</div>
+            <span class="number c-rose" id="val-sec1-gap">-8.00</span>
+          </div>
+        </div>
+
+        <div class="callout">
+          <b>The Elastic Gap:</b> When <span class="mono">w = 9</span>, the output shoots to <span class="mono">18</span>. The gap is <span class="mono c-rose">-8</span>. The minus sign is the compass: it commands the dial to turn <i>left</i> (decrease).
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ========================================== -->
+  <!-- 2. THE 3D LOSS BOWL (THREE.JS / WEBGL)     -->
+  <!-- ========================================== -->
+  <section id="sec-3d" class="section-card">
+    <div class="card-header">
+      <div class="card-title-group">
+        <h2><span>02</span> The 3D Loss Landscape (Orbitable Surface)</h2>
+        <p>A real-time 3D topography showing <span class="mono c-cyan">Loss = (Target - w·x)²</span>. Click and drag in 3D to rotate the bowl.</p>
+      </div>
+      <span class="pill">WEBGL 3D VIEW</span>
+    </div>
+
+    <div class="grid-2">
+      <!-- 3D Canvas -->
+      <div class="visual-canvas-container" id="threejs-container" style="height: 380px; cursor: grab;">
+        <div class="hint-overlay">🖱️ Click + Drag to rotate 3D view</div>
+      </div>
+
+      <!-- Controls & 3D Telemetry -->
+      <div class="control-group">
+        <div>
+          <div class="label-val">
+            <span class="mono">Position on 3D Surface (w):</span>
+            <span class="val c-cyan" id="val-sec2-w">9.00</span>
+          </div>
+          <input type="range" id="slider-sec2-w" min="0" max="10" step="0.05" value="9.00">
+        </div>
+
+        <div class="readout-grid">
+          <div class="stat-box">
+            <div class="title">Loss Height (z)</div>
+            <span class="number c-rose" id="val-sec2-loss">64.00</span>
+          </div>
+          <div class="stat-box">
+            <div class="title">Gravity Vector</div>
+            <span class="number c-cyan" id="val-sec2-slope">-32.0</span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn primary" id="btn-3d-drop">🔴 Drop Ball (Roll Downhill)</button>
+          <button class="btn" id="btn-3d-reset">Reset to w = 9</button>
+        </div>
+
+        <div class="callout">
+          <b>Why the Bowl exists:</b> Squaring the gap turns every error into positive altitude. The bottom of the bowl is <span class="mono c-green">Loss = 0</span> at exactly <span class="mono c-green">w = 5.0</span>.
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ========================================== -->
+  <!-- 3. THE TANGENT COMPASS (GEOMETRIC SLOPE)   -->
+  <!-- ========================================== -->
+  <section id="sec-slope" class="section-card">
+    <div class="card-header">
+      <div class="card-title-group">
+        <h2><span>03</span> The Tangent Slope (Calculus Without Formulas)</h2>
+        <p>The tangent line is a physical stick balancing on the curve. Its tilt is the compass.</p>
+      </div>
+      <span class="pill">2D TANGENT GEOMETRY</span>
+    </div>
+
+    <div class="grid-2">
+      <!-- 2D Canvas for Tangent -->
+      <div class="visual-canvas-container" style="height: 360px;">
+        <canvas id="slopeCanvas" width="500" height="340"></canvas>
+      </div>
+
+      <!-- Controls -->
+      <div class="control-group">
+        <div>
+          <div class="label-val">
+            <span class="mono">Weight Dial (w):</span>
+            <span class="val c-amber" id="val-sec3-w">9.00</span>
+          </div>
+          <input type="range" id="slider-sec3-w" min="0" max="10" step="0.05" value="9.00">
+        </div>
+
+        <div class="readout-grid">
+          <div class="stat-box">
+            <div class="title">Slope Angle</div>
+            <span class="number c-amber" id="val-sec3-angle">+68°</span>
+          </div>
+          <div class="stat-box">
+            <div class="title">Nudge Command</div>
+            <span class="number c-cyan" id="val-sec3-action">← Turn Left</span>
+          </div>
+        </div>
+
+        <div class="callout">
+          <b>Slope tells two things:</b><br>
+          1. <b>Tilt (Sign):</b> Uphill to the right? Turn left. Uphill to the left? Turn right.<br>
+          2. <b>Steepness (Magnitude):</b> Steeper slope = larger mistake = bigger safe step.
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ========================================== -->
+  <!-- 4. THE CLOSED LEARNING LOOP SIMULATOR      -->
+  <!-- ========================================== -->
+  <section id="sec-loop" class="section-card">
+    <div class="card-header">
+      <div class="card-title-group">
+        <h2><span>04</span> The Learning Loop & Step Size Dynamics</h2>
+        <p>Watch the machine execute the 3-step loop: <span class="mono">Forward → Gap → Nudge</span>. Adjust step size to see smooth convergence vs violent divergence.</p>
+      </div>
+      <span class="pill">ALGORITHM SIMULATOR</span>
+    </div>
+
+    <div class="grid-2">
+      <!-- Simulation Canvas: Parabola + Trail History -->
+      <div class="visual-canvas-container" style="height: 380px;">
+        <canvas id="loopCanvas" width="500" height="360"></canvas>
+      </div>
+
+      <!-- Simulation Controls -->
+      <div class="control-group">
+        <div class="btn-row">
+          <button class="btn primary" id="btn-loop-step">▶ Single Step</button>
+          <button class="btn" id="btn-loop-auto">⚡ Auto Run</button>
+          <button class="btn" id="btn-loop-reset">↺ Reset</button>
+        </div>
+
+        <div>
+          <div class="label-val">
+            <span class="mono">Step Size / Learning Rate (α):</span>
+            <span class="val c-cyan" id="val-sec4-lr">0.10</span>
+          </div>
+          <input type="range" id="slider-sec4-lr" min="0.02" max="1.15" step="0.01" value="0.10">
+          <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--ink-faint); margin-top: 4px;" class="mono">
+            <span>0.02 (Slow Crawl)</span>
+            <span>0.10 (Smooth)</span>
+            <span>1.00+ (Overshoot Wall)</span>
+          </div>
+        </div>
+
+        <div class="readout-grid">
+          <div class="stat-box">
+            <div class="title">Current w</div>
+            <span class="number c-green" id="val-sec4-w">9.00</span>
+          </div>
+          <div class="stat-box">
+            <div class="title">Iterations</div>
+            <span class="number" id="val-sec4-steps">0</span>
+          </div>
+          <div class="stat-box">
+            <div class="title">Loss</div>
+            <span class="number c-rose" id="val-sec4-loss">64.00</span>
+          </div>
+        </div>
+
+        <div class="callout" id="callout-lr-feedback">
+          <b>Status:</b> Ready. Click <b>Single Step</b> to watch the machine nudge itself closer to <span class="mono">w = 5.0</span>.
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ========================================== -->
+  <!-- 5. THE 2-WEIGHT VALLEY (THE NEXT WALL)    -->
+  <!-- ========================================== -->
+  <section id="sec-2d-terrain" class="section-card">
+    <div class="card-header">
+      <div class="card-title-group">
+        <h2><span>05</span> The 2-Dial Frontier: When Dials Interlock</h2>
+        <p>What happens when the machine has two dials <span class="mono c-cyan">w₁</span> and <span class="mono c-purple">w₂</span>? The 1D bowl expands into a 2D contour valley.</p>
+      </div>
+      <span class="pill">2-PARAMETER CONTOUR</span>
+    </div>
+
+    <div class="grid-2">
+      <!-- 2D Contour Map Canvas -->
+      <div class="visual-canvas-container" style="height: 380px;">
+        <canvas id="contourCanvas" width="500" height="360"></canvas>
+      </div>
+
+      <div class="control-group">
+        <div>
+          <div class="label-val">
+            <span class="mono">Dial 1 (w₁):</span>
+            <span class="val c-cyan" id="val-sec5-w1">8.00</span>
+          </div>
+          <input type="range" id="slider-sec5-w1" min="0" max="10" step="0.1" value="8.0">
+        </div>
+
+        <div>
+          <div class="label-val">
+            <span class="mono">Dial 2 (w₂):</span>
+            <span class="val c-purple" id="val-sec5-w2">1.50</span>
+          </div>
+          <input type="range" id="slider-sec5-w2" min="0" max="10" step="0.1" value="1.5">
+        </div>
+
+        <div class="readout-grid">
+          <div class="stat-box">
+            <div class="title">Combined Out</div>
+            <span class="number c-amber" id="val-sec5-out">19.00</span>
+          </div>
+          <div class="stat-box">
+            <div class="title">Total Loss</div>
+            <span class="number c-rose" id="val-sec5-loss">81.00</span>
+          </div>
+        </div>
+
+        <div class="callout">
+          <b>The 2D Valley:</b> Formula is <span class="mono">out = 2·w₁ + 2·w₂</span> with target <span class="mono">10</span>. Multiple combinations can achieve zero loss (the valley line).
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* =========================================================================
+   GLOBAL STATE & CONSTANTS
+   ========================================================================= */
+const INPUT_X = 2;
+const TARGET_Y = 10;
+const OPTIMAL_W = TARGET_Y / INPUT_X; // 5.0
+
+/* =========================================================================
+   SECTION 1: THE DIAL & NUMBER LINE
+   ========================================================================= */
+const sliderSec1W = document.getElementById('slider-sec1-w');
+const needle = document.getElementById('dial-needle');
+const dialTextVal = document.getElementById('dial-text-val');
+const svgOutVal = document.getElementById('svg-out-val');
+const numlineOutPin = document.getElementById('numline-out-pin');
+const numlineGapSpring = document.getElementById('numline-gap-spring');
+const numlineGapLabel = document.getElementById('numline-gap-label');
+
+const valSec1W = document.getElementById('val-sec1-w');
+const valSec1Out = document.getElementById('val-sec1-out');
+const valSec1Gap = document.getElementById('val-sec1-gap');
+
+function updateSection1(w) {
+  const out = w * INPUT_X;
+  const gap = TARGET_Y - out;
+
+  valSec1W.textContent = w.toFixed(2);
+  valSec1Out.textContent = out.toFixed(2);
+  valSec1Gap.textContent = (gap > 0 ? '+' : '') + gap.toFixed(2);
+
+  dialTextVal.textContent = `w = ${w.toFixed(2)}`;
+  svgOutVal.textContent = out.toFixed(2);
+
+  // Rotate needle (-135 deg to +135 deg for w in [0, 10])
+  const deg = -135 + (w / 10) * 270;
+  const rad = deg * Math.PI / 180;
+  const nx = 38 * Math.sin(rad);
+  const ny = -38 * Math.cos(rad);
+  needle.setAttribute('x2', nx);
+  needle.setAttribute('y2', ny);
+
+  // Number line pin position: 0 -> 0px, 20 -> 420px
+  const clampedOut = Math.max(0, Math.min(20, out));
+  const pinX = (clampedOut / 20) * 420;
+  numlineOutPin.setAttribute('cx', pinX);
+
+  // Gap spring line
+  numlineGapSpring.setAttribute('x2', pinX);
+  const midX = (210 + pinX) / 2;
+  numlineGapLabel.setAttribute('x', midX);
+  numlineGapLabel.textContent = `Gap: ${(gap > 0 ? '+' : '') + gap.toFixed(2)}`;
+}
+
+sliderSec1W.addEventListener('input', (e) => {
+  const w = parseFloat(e.target.value);
+  updateSection1(w);
+  // Sync section 2 & 3
+  sliderSec2W.value = w;
+  updateSection2(w);
+  sliderSec3W.value = w;
+  updateSection3(w);
+});
+
+
+/* =========================================================================
+   SECTION 2: 3D THREE.JS LOSS BOWL
+   ========================================================================= */
+const threeContainer = document.getElementById('threejs-container');
+const sliderSec2W = document.getElementById('slider-sec2-w');
+const valSec2W = document.getElementById('val-sec2-w');
+const valSec2Loss = document.getElementById('val-sec2-loss');
+const valSec2Slope = document.getElementById('val-sec2-slope');
+const btn3dDrop = document.getElementById('btn-3d-drop');
+const btn3dReset = document.getElementById('btn-3d-reset');
+
+let scene, camera, renderer, controls;
+let bowlMesh, ballMesh, targetMarker, gradientArrow;
+
+function initThreeJS() {
+  const width = threeContainer.clientWidth || 500;
+  const height = threeContainer.clientHeight || 380;
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x090d13);
+
+  camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+  camera.position.set(0, 14, 18);
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  threeContainer.appendChild(renderer.domElement);
+
+  if (typeof THREE.OrbitControls !== 'undefined') {
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2.05; // don't go below floor
+  }
+
+  // Lighting
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambientLight);
+
+  const dirLight = new THREE.DirectionalLight(0x38bdf8, 1.2);
+  dirLight.position.set(10, 20, 10);
+  scene.add(dirLight);
+
+  const pointLight = new THREE.PointLight(0x34d399, 1.5, 30);
+  pointLight.position.set(0, 5, 0);
+  scene.add(pointLight);
+
+  // Floor Grid
+  const gridHelper = new THREE.GridHelper(24, 24, 0x1e2d42, 0x172232);
+  gridHelper.position.y = -0.05;
+  scene.add(gridHelper);
+
+  // 3D Parabolic Bowl Geometry
+  const segments = 40;
+  const bowlGeo = new THREE.PlaneGeometry(16, 12, segments, segments);
+  const pos = bowlGeo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const wx = pos.getX(i); // x corresponds to (w - 5)
+    const wz = pos.getY(i); // z coordinate
+    const wVal = wx + 5;
+    const loss = Math.pow(TARGET_Y - wVal * INPUT_X, 2);
+    // scale down loss for nice 3D view height
+    const heightY = (loss / 64) * 6;
+    pos.setZ(i, -heightY);
+  }
+  bowlGeo.computeVertexNormals();
+
+  const bowlMat = new THREE.MeshStandardMaterial({
+    color: 0x1e3a5f,
+    roughness: 0.3,
+    metalness: 0.2,
+    wireframe: true,
+    transparent: true,
+    opacity: 0.75
+  });
+
+  bowlMesh = new THREE.Mesh(bowlGeo, bowlMat);
+  bowlMesh.rotation.x = Math.PI / 2;
+  scene.add(bowlMesh);
+
+  // Glowing Target Marker at (0, 0, 0) -> w = 5, Loss = 0
+  const targetGeo = new THREE.RingGeometry(0.3, 0.5, 24);
+  const targetMat = new THREE.MeshBasicMaterial({ color: 0x34d399, side: THREE.DoubleSide });
+  targetMarker = new THREE.Mesh(targetGeo, targetMat);
+  targetMarker.rotation.x = Math.PI / 2;
+  targetMarker.position.set(0, 0.05, 0);
+  scene.add(targetMarker);
+
+  // Ball on the surface
+  const ballGeo = new THREE.SphereGeometry(0.4, 32, 32);
+  const ballMat = new THREE.MeshStandardMaterial({
+    color: 0xfb7185,
+    emissive: 0xfb7185,
+    emissiveIntensity: 0.6,
+    roughness: 0.2
+  });
+  ballMesh = new THREE.Mesh(ballGeo, ballMat);
+  scene.add(ballMesh);
+
+  // Gradient Direction Arrow
+  const dir = new THREE.Vector3(-1, 0, 0);
+  gradientArrow = new THREE.ArrowHelper(dir, new THREE.Vector3(0, 0, 0), 2, 0x38bdf8, 0.5, 0.3);
+  scene.add(gradientArrow);
+
+  window.addEventListener('resize', onWindowResize);
+  animateThree();
+}
+
+function onWindowResize() {
+  if (!threeContainer || !camera || !renderer) return;
+  const width = threeContainer.clientWidth;
+  const height = threeContainer.clientHeight;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+}
+
+function updateSection2(w) {
+  const loss = Math.pow(TARGET_Y - w * INPUT_X, 2);
+  const slope = -2 * (TARGET_Y - w * INPUT_X) * INPUT_X; // dLoss/dw
+
+  valSec2W.textContent = w.toFixed(2);
+  valSec2Loss.textContent = loss.toFixed(2);
+  valSec2Slope.textContent = (slope > 0 ? '+' : '') + slope.toFixed(1);
+
+  if (ballMesh) {
+    const wx = (w - 5); // Center 5 at 0 in 3D
+    const heightY = (loss / 64) * 6;
+    ballMesh.position.set(wx, heightY + 0.4, 0);
+
+    // Update gradient arrow pointing downhill
+    const downhillX = w > 5 ? -1 : 1;
+    const arrowDir = new THREE.Vector3(downhillX, -Math.abs(slope) * 0.03, 0).normalize();
+    gradientArrow.position.set(wx, heightY + 0.4, 0);
+    gradientArrow.setDirection(arrowDir);
+    gradientArrow.setLength(Math.min(2.5, 0.5 + Math.abs(slope) * 0.05));
+    gradientArrow.visible = Math.abs(w - 5) > 0.05;
+  }
+}
+
+let is3DRolling = false;
+function rollBallDownhill() {
+  if (is3DRolling) return;
+  is3DRolling = true;
+  let curW = parseFloat(sliderSec2W.value);
+  const lr = 0.08;
+
+  const interval = setInterval(() => {
+    const gap = TARGET_Y - curW * INPUT_X;
+    curW = curW + lr * gap;
+    sliderSec2W.value = curW;
+    updateSection2(curW);
+    sliderSec1W.value = curW;
+    updateSection1(curW);
+    sliderSec3W.value = curW;
+    updateSection3(curW);
+
+    if (Math.abs(gap) < 0.02) {
+      clearInterval(interval);
+      is3DRolling = false;
+    }
+  }, 35);
+}
+
+btn3dDrop.addEventListener('click', rollBallDownhill);
+btn3dReset.addEventListener('click', () => {
+  sliderSec2W.value = 9.0;
+  updateSection2(9.0);
+  sliderSec1W.value = 9.0;
+  updateSection1(9.0);
+  sliderSec3W.value = 9.0;
+  updateSection3(9.0);
+});
+
+sliderSec2W.addEventListener('input', (e) => {
+  const w = parseFloat(e.target.value);
+  updateSection2(w);
+  sliderSec1W.value = w;
+  updateSection1(w);
+  sliderSec3W.value = w;
+  updateSection3(w);
+});
+
+function animateThree() {
+  requestAnimationFrame(animateThree);
+  if (controls) controls.update();
+  if (targetMarker) targetMarker.rotation.z += 0.01;
+  renderer.render(scene, camera);
+}
+
+
+/* =========================================================================
+   SECTION 3: 2D TANGENT SLOPE CANVAS
+   ========================================================================= */
+const slopeCanvas = document.getElementById('slopeCanvas');
+const sCtx = slopeCanvas.getContext('2d');
+const sliderSec3W = document.getElementById('slider-sec3-w');
+const valSec3W = document.getElementById('val-sec3-w');
+const valSec3Angle = document.getElementById('val-sec3-angle');
+const valSec3Action = document.getElementById('val-sec3-action');
+
+function drawSlopeCanvas(w) {
+  const W = slopeCanvas.width;
+  const H = slopeCanvas.height;
+  sCtx.clearRect(0, 0, W, H);
+
+  const padX = 50;
+  const padY = 40;
+  const mapX = (val) => padX + (val / 10) * (W - 2 * padX);
+  const mapY = (loss) => H - padY - (loss / 70) * (H - 2 * padY);
+
+  // Draw Grid Lines
+  sCtx.strokeStyle = '#1e2d42';
+  sCtx.lineWidth = 1;
+  sCtx.beginPath();
+  sCtx.moveTo(padX, H - padY);
+  sCtx.lineTo(W - padX, H - padY);
+  sCtx.moveTo(padX, padY);
+  sCtx.lineTo(padX, H - padY);
+  sCtx.stroke();
+
+  // Axis Labels
+  sCtx.fillStyle = '#8b9bb0';
+  sCtx.font = '11px JetBrains Mono';
+  sCtx.fillText('w = 0', padX - 10, H - padY + 18);
+  sCtx.fillText('w = 5 (Min)', mapX(5) - 30, H - padY + 18);
+  sCtx.fillText('w = 10', W - padX - 20, H - padY + 18);
+  sCtx.fillText('Loss', padX - 35, padY + 10);
+
+  // Parabola Curve
+  sCtx.strokeStyle = '#2f4565';
+  sCtx.lineWidth = 3;
+  sCtx.beginPath();
+  for (let x = 0; x <= 10; x += 0.1) {
+    const l = Math.pow(TARGET_Y - x * INPUT_X, 2);
+    const px = mapX(x);
+    const py = mapY(l);
+    if (x === 0) sCtx.moveTo(px, py);
+    else sCtx.lineTo(px, py);
+  }
+  sCtx.stroke();
+
+  // Current Point
+  const curLoss = Math.pow(TARGET_Y - w * INPUT_X, 2);
+  const curX = mapX(w);
+  const curY = mapY(curLoss);
+
+  // Tangent Line
+  // dLoss/dw = 2*(out - target)*x = 2*(2w - 10)*2 = 8w - 40
+  const dLoss_dw = 8 * w - 40;
+  const angleRad = Math.atan(dLoss_dw / 15);
+  const angleDeg = Math.round(angleRad * 180 / Math.PI);
+
+  const tLen = 90;
+  const tx1 = curX - tLen * Math.cos(angleRad);
+  const ty1 = curY + tLen * Math.sin(angleRad);
+  const tx2 = curX + tLen * Math.cos(angleRad);
+  const ty2 = curY - tLen * Math.sin(angleRad);
+
+  sCtx.strokeStyle = '#fbbf24';
+  sCtx.lineWidth = 3;
+  sCtx.beginPath();
+  sCtx.moveTo(tx1, ty1);
+  sCtx.lineTo(tx2, ty2);
+  sCtx.stroke();
+
+  // Draw Tangent Point
+  sCtx.fillStyle = '#fb7185';
+  sCtx.shadowColor = '#fb7185';
+  sCtx.shadowBlur = 12;
+  sCtx.beginPath();
+  sCtx.arc(curX, curY, 6, 0, Math.PI * 2);
+  sCtx.fill();
+  sCtx.shadowBlur = 0;
+
+  // Drop dashed line to axis
+  sCtx.strokeStyle = '#4e5f76';
+  sCtx.setLineDash([4, 4]);
+  sCtx.beginPath();
+  sCtx.moveTo(curX, curY);
+  sCtx.lineTo(curX, H - padY);
+  sCtx.stroke();
+  sCtx.setLineDash([]);
+
+  // Telemetry updates
+  valSec3W.textContent = w.toFixed(2);
+  valSec3Angle.textContent = (angleDeg > 0 ? '+' : '') + angleDeg + '°';
+  if (Math.abs(w - 5) < 0.05) {
+    valSec3Action.textContent = '🎯 At Flat Bottom (Zero Slope)';
+    valSec3Action.className = 'number c-green';
+  } else if (w > 5) {
+    valSec3Action.textContent = '← Turn Left (Decrease w)';
+    valSec3Action.className = 'number c-cyan';
+  } else {
+    valSec3Action.textContent = '→ Turn Right (Increase w)';
+    valSec3Action.className = 'number c-cyan';
+  }
+}
+
+function updateSection3(w) {
+  drawSlopeCanvas(w);
+}
+
+sliderSec3W.addEventListener('input', (e) => {
+  const w = parseFloat(e.target.value);
+  updateSection3(w);
+  sliderSec1W.value = w;
+  updateSection1(w);
+  sliderSec2W.value = w;
+  updateSection2(w);
+});
+
+
+/* =========================================================================
+   SECTION 4: CLOSED LEARNING LOOP SIMULATOR
+   ========================================================================= */
+const loopCanvas = document.getElementById('loopCanvas');
+const lCtx = loopCanvas.getContext('2d');
+const btnLoopStep = document.getElementById('btn-loop-step');
+const btnLoopAuto = document.getElementById('btn-loop-auto');
+const btnLoopReset = document.getElementById('btn-loop-reset');
+const sliderSec4Lr = document.getElementById('slider-sec4-lr');
+const valSec4Lr = document.getElementById('val-sec4-lr');
+const valSec4W = document.getElementById('val-sec4-w');
+const valSec4Steps = document.getElementById('val-sec4-steps');
+const valSec4Loss = document.getElementById('val-sec4-loss');
+const calloutLrFeedback = document.getElementById('callout-lr-feedback');
+
+let loopW = 9.0;
+let loopSteps = 0;
+let loopTrail = [{ w: 9.0, loss: 64.0 }];
+let autoLoopTimer = null;
+
+function calculateLoopLoss(w) {
+  return Math.pow(TARGET_Y - w * INPUT_X, 2);
+}
+
+function drawLoopCanvas() {
+  const W = loopCanvas.width;
+  const H = loopCanvas.height;
+  lCtx.clearRect(0, 0, W, H);
+
+  const padX = 45;
+  const padY = 35;
+  const mapX = (w) => padX + ((w + 2) / 14) * (W - 2 * padX);
+  const mapY = (loss) => H - padY - (Math.min(loss, 120) / 120) * (H - 2 * padY);
+
+  // Axis
+  lCtx.strokeStyle = '#1e2d42';
+  lCtx.lineWidth = 1;
+  lCtx.beginPath();
+  lCtx.moveTo(padX, H - padY);
+  lCtx.lineTo(W - padX, H - padY);
+  lCtx.stroke();
+
+  // Theoretical Parabola
+  lCtx.strokeStyle = '#2f4565';
+  lCtx.lineWidth = 2;
+  lCtx.beginPath();
+  for (let x = -2; x <= 12; x += 0.1) {
+    const l = calculateLoopLoss(x);
+    const px = mapX(x);
+    const py = mapY(l);
+    if (x === -2) lCtx.moveTo(px, py);
+    else lCtx.lineTo(px, py);
+  }
+  lCtx.stroke();
+
+  // Draw Step Trails (Arcs & Arrows)
+  for (let i = 0; i < loopTrail.length - 1; i++) {
+    const p1 = loopTrail[i];
+    const p2 = loopTrail[i + 1];
+    const x1 = mapX(p1.w);
+    const y1 = mapY(p1.loss);
+    const x2 = mapX(p2.w);
+    const y2 = mapY(p2.loss);
+
+    lCtx.strokeStyle = i === loopTrail.length - 2 ? '#38bdf8' : 'rgba(56, 189, 248, 0.35)';
+    lCtx.lineWidth = i === loopTrail.length - 2 ? 2.5 : 1.5;
+    lCtx.beginPath();
+    lCtx.moveTo(x1, y1);
+    lCtx.quadraticCurveTo((x1 + x2) / 2, Math.min(y1, y2) - 15, x2, y2);
+    lCtx.stroke();
+
+    // Circle at trail point
+    lCtx.fillStyle = '#38bdf8';
+    lCtx.beginPath();
+    lCtx.arc(x1, y1, 3, 0, Math.PI * 2);
+    lCtx.fill();
+  }
+
+  // Current Position Ball
+  const curX = mapX(loopW);
+  const curLoss = calculateLoopLoss(loopW);
+  const curY = mapY(curLoss);
+
+  lCtx.fillStyle = '#34d399';
+  lCtx.shadowColor = '#34d399';
+  lCtx.shadowBlur = 14;
+  lCtx.beginPath();
+  lCtx.arc(curX, curY, 7, 0, Math.PI * 2);
+  lCtx.fill();
+  lCtx.shadowBlur = 0;
+
+  // Target marker
+  const targX = mapX(5.0);
+  const targY = mapY(0);
+  lCtx.fillStyle = '#fbbf24';
+  lCtx.beginPath();
+  lCtx.arc(targX, targY, 4, 0, Math.PI * 2);
+  lCtx.fill();
+
+  // Labels
+  lCtx.fillStyle = '#8b9bb0';
+  lCtx.font = '10px JetBrains Mono';
+  lCtx.fillText('Target (w=5, Loss=0)', targX - 55, targY + 16);
+}
+
+function doSingleStep() {
+  const lr = parseFloat(sliderSec4Lr.value);
+  const gap = TARGET_Y - loopW * INPUT_X;
+  const newW = loopW + lr * gap;
+  
+  loopW = newW;
+  loopSteps++;
+  const newLoss = calculateLoopLoss(loopW);
+  loopTrail.push({ w: loopW, loss: newLoss });
+
+  valSec4W.textContent = loopW.toFixed(2);
+  valSec4Steps.textContent = loopSteps;
+  valSec4Loss.textContent = newLoss.toFixed(2);
+
+  // Dynamic feedback on step size
+  if (lr > 1.0) {
+    calloutLrFeedback.innerHTML = `⚠️ <b>Overshoot Warning:</b> Step size <span class="mono">${lr.toFixed(2)}</span> is too large! The dial bounces back and forth across the target and will diverge.`;
+  } else if (Math.abs(gap) < 0.05) {
+    calloutLrFeedback.innerHTML = `🎉 <b>Converged!</b> Reached <span class="mono">w = ${loopW.toFixed(2)}</span> in ${loopSteps} steps with near-zero loss.`;
+  } else {
+    calloutLrFeedback.innerHTML = `⚡ Step ${loopSteps}: Nudged by <span class="mono">${(lr * gap).toFixed(2)}</span>. Gap is now <span class="mono">${(TARGET_Y - loopW * INPUT_X).toFixed(2)}</span>.`;
+  }
+
+  drawLoopCanvas();
+}
+
+btnLoopStep.addEventListener('click', () => {
+  stopAutoLoop();
+  doSingleStep();
+});
+
+btnLoopAuto.addEventListener('click', () => {
+  if (autoLoopTimer) {
+    stopAutoLoop();
+  } else {
+    btnLoopAuto.classList.add('active');
+    btnLoopAuto.textContent = '⏸ Pause';
+    autoLoopTimer = setInterval(() => {
+      const gap = TARGET_Y - loopW * INPUT_X;
+      if (Math.abs(gap) < 0.02 || loopSteps > 50) {
+        stopAutoLoop();
+        return;
+      }
+      doSingleStep();
+    }, 200);
+  }
+});
+
+function stopAutoLoop() {
+  if (autoLoopTimer) {
+    clearInterval(autoLoopTimer);
+    autoLoopTimer = null;
+  }
+  btnLoopAuto.classList.remove('active');
+  btnLoopAuto.textContent = '⚡ Auto Run';
+}
+
+btnLoopReset.addEventListener('click', () => {
+  stopAutoLoop();
+  loopW = 9.0;
+  loopSteps = 0;
+  loopTrail = [{ w: 9.0, loss: 64.0 }];
+  valSec4W.textContent = '9.00';
+  valSec4Steps.textContent = '0';
+  valSec4Loss.textContent = '64.00';
+  calloutLrFeedback.innerHTML = `<b>Status:</b> Reset back to start <span class="mono">w = 9.0</span>.`;
+  drawLoopCanvas();
+});
+
+sliderSec4Lr.addEventListener('input', (e) => {
+  valSec4Lr.textContent = parseFloat(e.target.value).toFixed(2);
+});
+
+
+/* =========================================================================
+   SECTION 5: 2-WEIGHT CONTOUR VALLEY
+   ========================================================================= */
+const contourCanvas = document.getElementById('contourCanvas');
+const cCtx = contourCanvas.getContext('2d');
+const sliderSec5W1 = document.getElementById('slider-sec5-w1');
+const sliderSec5W2 = document.getElementById('slider-sec5-w2');
+const valSec5W1 = document.getElementById('val-sec5-w1');
+const valSec5W2 = document.getElementById('val-sec5-w2');
+const valSec5Out = document.getElementById('val-sec5-out');
+const valSec5Loss = document.getElementById('val-sec5-loss');
+
+function drawContour(w1, w2) {
+  const W = contourCanvas.width;
+  const H = contourCanvas.height;
+  cCtx.clearRect(0, 0, W, H);
+
+  const pad = 40;
+  const mapX = (val) => pad + (val / 10) * (W - 2 * pad);
+  const mapY = (val) => H - pad - (val / 10) * (H - 2 * pad);
+
+  // Draw background loss contours
+  const imgData = cCtx.createImageData(W, H);
+  for (let py = 0; py < H; py += 3) {
+    for (let px = 0; px < W; px += 3) {
+      const gW1 = ((px - pad) / (W - 2 * pad)) * 10;
+      const gW2 = (((H - pad) - py) / (H - 2 * pad)) * 10;
+      
+      if (gW1 >= 0 && gW1 <= 10 && gW2 >= 0 && gW2 <= 10) {
+        const out = 2 * gW1 + 2 * gW2;
+        const loss = Math.pow(TARGET_Y - out, 2);
+        const band = Math.sin(Math.sqrt(loss) * 0.8);
+        const intensity = Math.max(0, Math.min(255, 20 + band * 25));
+
+        for (let dy = 0; dy < 3; dy++) {
+          for (let dx = 0; dx < 3; dx++) {
+            const idx = ((py + dy) * W + (px + dx)) * 4;
+            imgData.data[idx] = 17;
+            imgData.data[idx + 1] = 24 + intensity * 0.3;
+            imgData.data[idx + 2] = 35 + intensity * 0.6;
+            imgData.data[idx + 3] = 255;
+          }
+        }
+      }
+    }
+  }
+  cCtx.putImageData(imgData, 0, 0);
+
+  // Optimal Valley Line: 2*w1 + 2*w2 = 10 -> w1 + w2 = 5 -> w2 = 5 - w1
+  cCtx.strokeStyle = '#34d399';
+  cCtx.lineWidth = 3;
+  cCtx.beginPath();
+  cCtx.moveTo(mapX(0), mapY(5));
+  cCtx.lineTo(mapX(5), mapY(0));
+  cCtx.stroke();
+
+  // Axes
+  cCtx.strokeStyle = '#2f4565';
+  cCtx.lineWidth = 1.5;
+  cCtx.beginPath();
+  cCtx.moveTo(pad, H - pad);
+  cCtx.lineTo(W - pad, H - pad);
+  cCtx.moveTo(pad, pad);
+  cCtx.lineTo(pad, H - pad);
+  cCtx.stroke();
+
+  cCtx.fillStyle = '#8b9bb0';
+  cCtx.font = '10px JetBrains Mono';
+  cCtx.fillText('w₁ (Dial 1)', W - pad - 50, H - pad + 24);
+  cCtx.fillText('w₂ (Dial 2)', pad - 30, pad - 10);
+  cCtx.fillText('Optimal Valley (Loss = 0)', mapX(2.5) + 10, mapY(2.5) - 10);
+
+  // Current Point
+  const curX = mapX(w1);
+  const curY = mapY(w2);
+
+  cCtx.fillStyle = '#fb7185';
+  cCtx.shadowColor = '#fb7185';
+  cCtx.shadowBlur = 14;
+  cCtx.beginPath();
+  cCtx.arc(curX, curY, 8, 0, Math.PI * 2);
+  cCtx.fill();
+  cCtx.shadowBlur = 0;
+
+  // Readouts
+  const combOut = 2 * w1 + 2 * w2;
+  const combLoss = Math.pow(TARGET_Y - combOut, 2);
+
+  valSec5W1.textContent = w1.toFixed(2);
+  valSec5W2.textContent = w2.toFixed(2);
+  valSec5Out.textContent = combOut.toFixed(2);
+  valSec5Loss.textContent = combLoss.toFixed(2);
+}
+
+function updateSection5() {
+  const w1 = parseFloat(sliderSec5W1.value);
+  const w2 = parseFloat(sliderSec5W2.value);
+  drawContour(w1, w2);
+}
+
+sliderSec5W1.addEventListener('input', updateSection5);
+sliderSec5W2.addEventListener('input', updateSection5);
+
+
+/* =========================================================================
+   INITIALIZATION
+   ========================================================================= */
+window.addEventListener('DOMContentLoaded', () => {
+  updateSection1(9.0);
+  initThreeJS();
+  updateSection2(9.0);
+  updateSection3(9.0);
+  drawLoopCanvas();
+  updateSection5();
+});
+</script>
+
+</body>
+</html>

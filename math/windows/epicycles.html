@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>The Spinners</title>
+    <style>
+        body { 
+            background: #111; 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+            font-family: monospace; 
+        }
+        canvas {
+            background: #1a1a1a;
+            border: 2px solid #444;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(0,255,204,0.1);
+        }
+        .controls {
+            display: flex;
+            gap: 30px;
+            background: #222;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        input[type=range] {
+            width: 150px;
+            accent-color: #00ffcc;
+        }
+        button {
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 10px 20px;
+            font-family: monospace;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover { background: #444; border-color: #00ffcc; }
+        .label-text { font-size: 16px; color: #aaa; }
+        .val-text { font-size: 18px; font-weight: bold; color: #00ffcc; }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas" width="600" height="500"></canvas>
+
+    <div class="controls">
+        <div class="slider-group">
+            <span class="label-text">Arm 2 Speed</span>
+            <input type="range" id="speed2" min="-10" max="10" step="1" value="3">
+            <span class="val-text" id="v_speed2">3</span>
+        </div>
+        <div class="slider-group">
+            <span class="label-text">Arm 2 Length</span>
+            <input type="range" id="len2" min="10" max="150" step="1" value="70">
+            <span class="val-text" id="v_len2">70</span>
+        </div>
+        <div class="slider-group" style="justify-content: center;">
+            <button onclick="clearTrail()">Clear Trace</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Settings
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        
+        let time = 0;
+        let trail = [];
+
+        // Arm 1 is fixed in length and base speed
+        const len1 = 100;
+        const speed1 = 1; 
+
+        function draw() {
+            // Update UI
+            const speed2 = parseFloat(document.getElementById('speed2').value);
+            const len2 = parseFloat(document.getElementById('len2').value);
+            
+            document.getElementById('v_speed2').innerText = speed2;
+            document.getElementById('v_len2').innerText = len2;
+
+            // Math: Calculate positions
+            // Base arm (Arm 1)
+            let angle1 = time * speed1;
+            let x1 = cx + len1 * Math.cos(angle1);
+            let y1 = cy + len1 * Math.sin(angle1);
+
+            // Second arm attached to the end of the first arm
+            let angle2 = time * speed2;
+            let x2 = x1 + len2 * Math.cos(angle2);
+            let y2 = y1 + len2 * Math.sin(angle2);
+
+            // Store trail
+            trail.push({x: x2, y: y2});
+            if(trail.length > 500) trail.shift(); // keep trail from getting infinitely heavy
+
+            // DRAWING
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Trail
+            if (trail.length > 1) {
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(255, 51, 102, 0.8)';
+                ctx.lineWidth = 2;
+                ctx.moveTo(trail[0].x, trail[0].y);
+                for(let i=1; i<trail.length; i++) {
+                    ctx.lineTo(trail[i].x, trail[i].y);
+                }
+                ctx.stroke();
+            }
+
+            // Draw Arms
+            ctx.beginPath();
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 3;
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+
+            // Draw Joints
+            ctx.beginPath();
+            ctx.fillStyle = '#fff';
+            ctx.arc(cx, cy, 4, 0, Math.PI*2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.fillStyle = '#00ffcc';
+            ctx.arc(x1, y1, 4, 0, Math.PI*2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.fillStyle = '#ff3366';
+            ctx.arc(x2, y2, 6, 0, Math.PI*2);
+            ctx.fill();
+
+            // Increment time
+            time += 0.02;
+            requestAnimationFrame(draw);
+        }
+
+        function clearTrail() {
+            trail = [];
+        }
+
+        // Start loop
+        draw();
+    </script>
+</body>
+</html>

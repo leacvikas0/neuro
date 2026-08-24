@@ -1,0 +1,1637 @@
+<!--
+  CURVED SPACETIME & PROPER ACCELERATION — EXHIBIT INSTRUMENT
+  Beat 01: STRAIGHT — 3D globe, two equatorial walkers along gold meridians meet at North Pole with zero steering.
+  Beat 02: THE MAP — Split globe vs equirectangular map of same tracks; crossed-out phantom force on map only.
+  Beat 03: ONE ROOM — Small falling cabin (pens parallel, LOCAL) vs planet-scale drop (pens drift together).
+  Beat 04: LOCAL UP — 12 observers with radial vermillion arrows on constant-radius sphere + latitude dual mode.
+  Beat 05: NO GLOBAL FRAME — Torn global triad vs patch of local inertial frames; closing floor question.
+  BANS CONFIRMED: No rubber sheet, no funnel, no expanding Earth, no giant arrow, no parallel ups, no illusion slogan, no (t,r) graph.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Curvature &amp; Proper Acceleration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0c10;
+      --bg-card: rgba(14, 17, 24, 0.88);
+      --bg-card-border: rgba(232, 200, 114, 0.22);
+      --text-main: #f4edd9;
+      --text-muted: #9aa4b2;
+      --text-faint: #576070;
+      --gold: #e8c872;
+      --gold-bright: #fce7a4;
+      --gold-glow: rgba(232, 200, 114, 0.35);
+      --vermillion: #e64a2e;
+      --vermillion-bright: #ff6e54;
+      --vermillion-glow: rgba(230, 74, 46, 0.45);
+      --slate-border: rgba(110, 130, 155, 0.3);
+      --font-serif: 'Fraunces', Georgia, serif;
+      --font-sans: 'Syne', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      background-image: 
+        radial-gradient(circle at 50% 40%, #131722 0%, #080a0e 85%),
+        radial-gradient(circle at 80% 80%, rgba(232, 200, 114, 0.03) 0%, transparent 50%);
+    }
+
+    #app {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 2;
+    }
+
+    /* TOP HEADER */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 36px;
+      border-bottom: 1px solid rgba(232, 200, 114, 0.15);
+      backdrop-filter: blur(16px);
+      background: rgba(10, 12, 16, 0.7);
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-symbol {
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid var(--gold);
+      border-radius: 50%;
+      position: relative;
+      box-shadow: 0 0 10px var(--gold-glow);
+    }
+    .brand-symbol::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background: var(--gold);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .brand-title {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: var(--text-main);
+    }
+    .brand-title span {
+      color: var(--gold);
+      font-style: italic;
+    }
+
+    /* BEAT INDEX NAVIGATION */
+    .beat-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 20, 28, 0.85);
+      padding: 4px 6px;
+      border-radius: 30px;
+      border: 1px solid var(--bg-card-border);
+    }
+
+    .beat-step-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .beat-step-btn .num {
+      color: var(--gold);
+      font-weight: 700;
+      opacity: 0.75;
+    }
+
+    .beat-step-btn:hover {
+      color: var(--text-main);
+      background: rgba(232, 200, 114, 0.1);
+    }
+
+    .beat-step-btn.active {
+      color: #080a0e;
+      background: var(--gold);
+      font-weight: 700;
+      box-shadow: 0 0 14px var(--gold-glow);
+    }
+    .beat-step-btn.active .num {
+      color: #080a0e;
+      opacity: 1;
+    }
+
+    /* MAIN STAGE */
+    main#stage-container {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    canvas#viewport {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+    canvas#viewport:active {
+      cursor: grabbing;
+    }
+
+    /* OVERLAY EDITORIAL CARDS */
+    .beat-overlay {
+      position: absolute;
+      top: 22px;
+      left: 32px;
+      max-width: 380px;
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 12px;
+      padding: 18px 22px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+      pointer-events: auto;
+      z-index: 5;
+    }
+
+    .beat-tag {
+      font-family: var(--font-sans);
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--gold);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .beat-tag::before {
+      content: "";
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      background: var(--gold);
+      border-radius: 50%;
+    }
+
+    .beat-title {
+      font-family: var(--font-serif);
+      font-size: 1.4rem;
+      font-weight: 400;
+      line-height: 1.2;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .beat-caption {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--gold-bright);
+      line-height: 1.35;
+      margin-bottom: 12px;
+    }
+
+    .beat-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* BUTTONS */
+    .action-btn {
+      background: rgba(232, 200, 114, 0.08);
+      border: 1px solid rgba(232, 200, 114, 0.3);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 0.76rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      padding: 6px 13px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .action-btn:hover {
+      background: rgba(232, 200, 114, 0.2);
+      border-color: var(--gold);
+      box-shadow: 0 0 10px rgba(232, 200, 114, 0.2);
+    }
+    .action-btn.active {
+      background: var(--gold);
+      color: #080a0e;
+      border-color: var(--gold);
+      box-shadow: 0 0 12px var(--gold-glow);
+    }
+
+    .action-btn.vermillion {
+      background: rgba(230, 74, 46, 0.1);
+      border-color: rgba(230, 74, 46, 0.35);
+      color: var(--vermillion-bright);
+    }
+    .action-btn.vermillion:hover {
+      background: rgba(230, 74, 46, 0.25);
+      border-color: var(--vermillion);
+    }
+    .action-btn.vermillion.active {
+      background: var(--vermillion);
+      color: #fff;
+      border-color: var(--vermillion);
+      box-shadow: 0 0 12px var(--vermillion-glow);
+    }
+
+    /* BEAT 5 QUESTION CARD */
+    .final-question-card {
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: rgba(232, 200, 114, 0.07);
+      border-left: 3px solid var(--gold);
+      border-radius: 4px;
+    }
+    .final-question-text {
+      font-family: var(--font-serif);
+      font-size: 1.12rem;
+      color: var(--gold-bright);
+      font-style: italic;
+      line-height: 1.3;
+    }
+
+    /* FOOTER */
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 36px;
+      background: rgba(10, 12, 16, 0.85);
+      border-top: 1px solid rgba(232, 200, 114, 0.15);
+      backdrop-filter: blur(16px);
+      z-index: 10;
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      font-size: 0.76rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .legend-dot.gold {
+      background: var(--gold);
+      box-shadow: 0 0 8px var(--gold-glow);
+    }
+    .legend-dot.vermillion {
+      background: var(--vermillion);
+      box-shadow: 0 0 8px var(--vermillion-glow);
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      background: rgba(232, 200, 114, 0.08);
+      border: 1px solid var(--gold);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .nav-btn:hover {
+      background: var(--gold);
+      color: #080a0e;
+      box-shadow: 0 0 16px var(--gold-glow);
+      transform: translateY(-1px);
+    }
+    .nav-btn.primary {
+      background: var(--gold);
+      color: #080a0e;
+      font-weight: 700;
+      box-shadow: 0 0 14px var(--gold-glow);
+    }
+    .nav-btn.primary:hover {
+      background: var(--gold-bright);
+      box-shadow: 0 0 22px rgba(232, 200, 114, 0.6);
+    }
+    .nav-btn:disabled {
+      opacity: 0.25;
+      pointer-events: none;
+      border-color: var(--text-faint);
+    }
+
+    .key-hints {
+      font-size: 0.72rem;
+      color: var(--text-faint);
+      margin-left: 8px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media (max-width: 960px) {
+      header { padding: 12px 18px; }
+      .brand-title { font-size: 0.9rem; }
+      .beat-step-btn span.label { display: none; }
+      .beat-overlay { left: 16px; top: 16px; max-width: calc(100vw - 32px); padding: 14px; }
+      footer { padding: 10px 18px; }
+      .key-hints { display: none; }
+      .legend { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- HEADER -->
+    <header>
+      <div class="brand">
+        <div class="brand-symbol"></div>
+        <div class="brand-title">CURVATURE &amp; <span>PROPER ACCELERATION</span></div>
+      </div>
+
+      <nav class="beat-nav" aria-label="Exhibition Beats">
+        <button class="beat-step-btn active" data-beat="1">
+          <span class="num">01</span><span class="label">Straight</span>
+        </button>
+        <button class="beat-step-btn" data-beat="2">
+          <span class="num">02</span><span class="label">The Map</span>
+        </button>
+        <button class="beat-step-btn" data-beat="3">
+          <span class="num">03</span><span class="label">One Room</span>
+        </button>
+        <button class="beat-step-btn" data-beat="4">
+          <span class="num">04</span><span class="label">Local Up</span>
+        </button>
+        <button class="beat-step-btn" data-beat="5">
+          <span class="num">05</span><span class="label">No Global Frame</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- MAIN VIEWPORT -->
+    <main id="stage-container">
+      <canvas id="viewport"></canvas>
+
+      <!-- BEAT 1 OVERLAY -->
+      <div class="beat-overlay" id="overlay-beat-1">
+        <div class="beat-tag">Beat 01 · Great Circles</div>
+        <h1 class="beat-title">Geodesics on a Sphere</h1>
+        <div class="beat-caption">“No sideways force. Straightest walk. They still meet.”</div>
+        <div class="beat-controls">
+          <button class="action-btn" id="btn-play-1">❚❚ Pause</button>
+          <button class="action-btn" id="btn-reset-1">↺ Reset</button>
+          <button class="action-btn" id="btn-sep-1">Separation: 45°</button>
+        </div>
+      </div>
+
+      <!-- BEAT 2 OVERLAY -->
+      <div class="beat-overlay" id="overlay-beat-2" style="display:none;">
+        <div class="beat-tag">Beat 02 · Coordinate Distortion</div>
+        <h1 class="beat-title">The Flat Map Artifact</h1>
+        <div class="beat-caption">“The pull lives on the map. Not on the globe.”</div>
+        <div class="beat-controls">
+          <button class="action-btn" id="btn-play-2">❚❚ Pause</button>
+          <button class="action-btn" id="btn-reset-2">↺ Reset</button>
+        </div>
+      </div>
+
+      <!-- BEAT 3 OVERLAY -->
+      <div class="beat-overlay" id="overlay-beat-3" style="display:none;">
+        <div class="beat-tag">Beat 03 · Local vs Global</div>
+        <h1 class="beat-title">The Boundary of Free Fall</h1>
+        <div class="beat-caption">“A room can forget gravity. A planet cannot.”</div>
+        <div class="beat-controls">
+          <button class="action-btn" id="btn-drop-3">▶ Drop Test</button>
+          <button class="action-btn" id="btn-reset-3">↺ Reset</button>
+        </div>
+      </div>
+
+      <!-- BEAT 4 OVERLAY -->
+      <div class="beat-overlay" id="overlay-beat-4" style="display:none;">
+        <div class="beat-tag">Beat 04 · Resolving the Paradox</div>
+        <h1 class="beat-title" id="beat-4-heading">Local Radial Acceleration</h1>
+        <div class="beat-caption" id="beat-4-caption">“Every up is real. They do not agree. Radius holds.”</div>
+        <div class="beat-controls">
+          <button class="action-btn vermillion active" id="btn-mode-radial-4">Radial Up</button>
+          <button class="action-btn" id="btn-mode-latitude-4">Latitude Dual</button>
+          <button class="action-btn" id="btn-antipodes-4">Diameter 2R</button>
+        </div>
+      </div>
+
+      <!-- BEAT 5 OVERLAY -->
+      <div class="beat-overlay" id="overlay-beat-5" style="display:none;">
+        <div class="beat-tag">Beat 05 · Global Manifold</div>
+        <h1 class="beat-title">No Global Inertial Frame</h1>
+        <div class="beat-caption">“No one inertial frame for the planet.”</div>
+        <div class="beat-controls">
+          <button class="action-btn active" id="btn-toggle-frame-mode">View: Local Frames</button>
+          <button class="action-btn" id="btn-rotate-5">Auto-Rotate</button>
+        </div>
+        <div class="final-question-card">
+          <div class="final-question-text">“So what is the floor doing to you right now?”</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-dot gold"></div>
+          <span>Gold: Geodesic / Free</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot vermillion"></div>
+          <span>Vermillion: Forced / Steering</span>
+        </div>
+      </div>
+
+      <div class="nav-controls">
+        <button class="nav-btn" id="btn-prev" disabled>← Previous</button>
+        <button class="nav-btn primary" id="btn-next">Continue →</button>
+        <span class="key-hints">Space / ← → to navigate · Drag to rotate</span>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    /* ═══════════════════════════════════════════════════════════════
+       CURVED SPACETIME EXHIBIT ENGINE
+       Vanilla JS + Canvas 2D with Spherical Geometry & Film Grain
+       ═══════════════════════════════════════════════════════════════ */
+
+    const state = {
+      currentBeat: 1,
+      totalBeats: 5,
+      // 3D Globe Rotation
+      yaw: 0.35,
+      pitch: 0.32,
+      targetYaw: 0.35,
+      targetPitch: 0.32,
+      autoRotate: false,
+      isDragging: false,
+      lastMouseX: 0,
+      lastMouseY: 0,
+      // Beat 1: Great-Circle Walkers
+      b1: {
+        progress: 0,
+        speed: 0.22,
+        playing: true,
+        separationDeg: 45
+      },
+      // Beat 2: Map distortion
+      b2: {
+        progress: 0,
+        speed: 0.22,
+        playing: true
+      },
+      // Beat 3: Local vs Global Cabin
+      b3: {
+        dropTime: 0,
+        dropping: true
+      },
+      // Beat 4: Local Up & Latitude Dual
+      b4: {
+        mode: 'radial', // 'radial' or 'latitude'
+        highlightAntipodes: false,
+        thrustFlicker: 0,
+        latTime: 0
+      },
+      // Beat 5: No Global Frame
+      b5: {
+        mode: 'local_frames', // 'local_frames' or 'torn_grid'
+        tearFactor: 0
+      }
+    };
+
+    const canvas = document.getElementById('viewport');
+    const ctx = canvas.getContext('2d');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const stepBtns = document.querySelectorAll('.beat-step-btn');
+
+    let dpr = window.devicePixelRatio || 1;
+    let width = 0;
+    let height = 0;
+
+    // FILM GRAIN PATTERN
+    let grainCanvas = document.createElement('canvas');
+    let grainCtx = grainCanvas.getContext('2d');
+    let grainPattern = null;
+
+    function initGrain() {
+      const gSize = 128;
+      grainCanvas.width = gSize;
+      grainCanvas.height = gSize;
+      const gImg = grainCtx.createImageData(gSize, gSize);
+      const data = gImg.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const val = Math.floor(Math.random() * 255);
+        data[i] = val;
+        data[i + 1] = val;
+        data[i + 2] = val;
+        data[i + 3] = 18; // Very subtle noise
+      }
+      grainCtx.putImageData(gImg, 0, 0);
+      grainPattern = ctx.createPattern(grainCanvas, 'repeat');
+    }
+
+    function resizeCanvas() {
+      const container = document.getElementById('stage-container');
+      width = container.clientWidth;
+      height = container.clientHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      initGrain();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // NAVIGATION
+    function setBeat(newBeat) {
+      if (newBeat < 1 || newBeat > state.totalBeats) return;
+      state.currentBeat = newBeat;
+
+      stepBtns.forEach(btn => {
+        const b = parseInt(btn.dataset.beat, 10);
+        btn.classList.toggle('active', b === state.currentBeat);
+      });
+
+      for (let i = 1; i <= state.totalBeats; i++) {
+        const overlay = document.getElementById(`overlay-beat-${i}`);
+        if (overlay) overlay.style.display = (i === state.currentBeat) ? 'block' : 'none';
+      }
+
+      btnPrev.disabled = (state.currentBeat === 1);
+      btnNext.textContent = (state.currentBeat === state.totalBeats) ? 'Restart ↺' : 'Continue →';
+
+      if (state.currentBeat === 1) {
+        state.b1.progress = 0;
+        state.b1.playing = true;
+      } else if (state.currentBeat === 2) {
+        state.b2.progress = 0;
+        state.b2.playing = true;
+      } else if (state.currentBeat === 3) {
+        state.b3.dropTime = 0;
+        state.b3.dropping = true;
+      } else if (state.currentBeat === 4) {
+        state.b4.thrustFlicker = 0;
+      }
+    }
+
+    stepBtns.forEach(btn => {
+      btn.addEventListener('click', () => setBeat(parseInt(btn.dataset.beat, 10)));
+    });
+
+    btnPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setBeat(state.currentBeat - 1);
+    });
+
+    btnNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (state.currentBeat === state.totalBeats) setBeat(1);
+      else setBeat(state.currentBeat + 1);
+    });
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'BUTTON') return;
+      if (e.code === 'ArrowRight' || e.code === 'Space') {
+        e.preventDefault();
+        if (state.currentBeat < state.totalBeats) setBeat(state.currentBeat + 1);
+        else setBeat(1);
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        setBeat(state.currentBeat - 1);
+      }
+    });
+
+    // CONTROLS FOR EACH BEAT
+    // Beat 1
+    const btnPlay1 = document.getElementById('btn-play-1');
+    btnPlay1.addEventListener('click', function() {
+      state.b1.playing = !state.b1.playing;
+      this.textContent = state.b1.playing ? '❚❚ Pause' : '▶ Play';
+    });
+    document.getElementById('btn-reset-1').addEventListener('click', () => { 
+      state.b1.progress = 0; 
+      state.b1.playing = true;
+      btnPlay1.textContent = '❚❚ Pause';
+    });
+    document.getElementById('btn-sep-1').addEventListener('click', function() {
+      const seps = [30, 45, 60, 90];
+      const nextIdx = (seps.indexOf(state.b1.separationDeg) + 1) % seps.length;
+      state.b1.separationDeg = seps[nextIdx];
+      this.textContent = `Separation: ${state.b1.separationDeg}°`;
+    });
+
+    // Beat 2
+    const btnPlay2 = document.getElementById('btn-play-2');
+    btnPlay2.addEventListener('click', function() {
+      state.b2.playing = !state.b2.playing;
+      this.textContent = state.b2.playing ? '❚❚ Pause' : '▶ Play';
+    });
+    document.getElementById('btn-reset-2').addEventListener('click', () => { 
+      state.b2.progress = 0; 
+      state.b2.playing = true;
+      btnPlay2.textContent = '❚❚ Pause';
+    });
+
+    // Beat 3
+    document.getElementById('btn-drop-3').addEventListener('click', () => {
+      state.b3.dropTime = 0;
+      state.b3.dropping = true;
+    });
+    document.getElementById('btn-reset-3').addEventListener('click', () => {
+      state.b3.dropTime = 0;
+      state.b3.dropping = false;
+    });
+
+    // Beat 4
+    const btnModeRadial = document.getElementById('btn-mode-radial-4');
+    const btnModeLatitude = document.getElementById('btn-mode-latitude-4');
+    const btnAntipodes = document.getElementById('btn-antipodes-4');
+    const b4Heading = document.getElementById('beat-4-heading');
+    const b4Caption = document.getElementById('beat-4-caption');
+
+    btnModeRadial.addEventListener('click', () => {
+      state.b4.mode = 'radial';
+      btnModeRadial.classList.add('active');
+      btnModeLatitude.classList.remove('active');
+      btnAntipodes.style.display = 'inline-flex';
+      b4Heading.textContent = "Local Radial Acceleration";
+      b4Caption.textContent = "“Every up is real. They do not agree. Radius holds.”";
+    });
+    btnModeLatitude.addEventListener('click', () => {
+      state.b4.mode = 'latitude';
+      btnModeLatitude.classList.add('active');
+      btnModeRadial.classList.remove('active');
+      btnAntipodes.style.display = 'none';
+      b4Heading.textContent = "Latitude Spacetime Dual";
+      b4Caption.textContent = "“Turning away. Distance locked. That is the shape.”";
+    });
+    btnAntipodes.addEventListener('click', function() {
+      state.b4.highlightAntipodes = !state.b4.highlightAntipodes;
+      this.classList.toggle('active', state.b4.highlightAntipodes);
+    });
+
+    // Beat 5
+    const btnToggleFrameMode = document.getElementById('btn-toggle-frame-mode');
+    btnToggleFrameMode.addEventListener('click', function() {
+      state.b5.mode = (state.b5.mode === 'local_frames') ? 'torn_grid' : 'local_frames';
+      this.textContent = (state.b5.mode === 'local_frames') ? 'View: Local Frames' : 'View: Torn Grid';
+      this.classList.toggle('active', state.b5.mode === 'local_frames');
+    });
+    document.getElementById('btn-rotate-5').addEventListener('click', function() {
+      state.autoRotate = !state.autoRotate;
+      this.classList.toggle('active', state.autoRotate);
+    });
+
+    // POINTER DRAG ROTATION
+    canvas.addEventListener('pointerdown', (e) => {
+      state.isDragging = true;
+      state.lastMouseX = e.clientX;
+      state.lastMouseY = e.clientY;
+      canvas.setPointerCapture(e.pointerId);
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+      if (!state.isDragging) return;
+      const dx = e.clientX - state.lastMouseX;
+      const dy = e.clientY - state.lastMouseY;
+      state.lastMouseX = e.clientX;
+      state.lastMouseY = e.clientY;
+
+      state.targetYaw += dx * 0.006;
+      state.targetPitch += dy * 0.006;
+      state.targetPitch = Math.max(-Math.PI * 0.44, Math.min(Math.PI * 0.44, state.targetPitch));
+    });
+
+    canvas.addEventListener('pointerup', (e) => {
+      state.isDragging = false;
+      try { canvas.releasePointerCapture(e.pointerId); } catch(err) {}
+    });
+
+    /* ═══════════════════════════════════════════════════════════════
+       3D PROJECTION & SPHERICAL MATH
+       ═══════════════════════════════════════════════════════════════ */
+
+    function project3D(lat, lon, R, cx, cy, yaw, pitch) {
+      const cosLat = Math.cos(lat);
+      const sinLat = Math.sin(lat);
+      const cosLon = Math.cos(lon);
+      const sinLon = Math.sin(lon);
+
+      // Spherical to 3D Cartesian
+      const x0 = cosLat * sinLon;
+      const y0 = sinLat;
+      const z0 = cosLat * cosLon;
+
+      // Yaw rotation (Y-axis)
+      const cosY = Math.cos(yaw);
+      const sinY = Math.sin(yaw);
+      const x1 = x0 * cosY + z0 * sinY;
+      const z1 = -x0 * sinY + z0 * cosY;
+      const y1 = y0;
+
+      // Pitch rotation (X-axis)
+      const cosP = Math.cos(pitch);
+      const sinP = Math.sin(pitch);
+      const y2 = y1 * cosP - z1 * sinP;
+      const z2 = y1 * sinP + z1 * cosP;
+      const x2 = x1;
+
+      return {
+        x: cx + R * x2,
+        y: cy - R * y2,
+        z: z2,
+        normalX: x2,
+        normalY: y2,
+        normalZ: z2,
+        visible: z2 > -0.04
+      };
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       GLOBE RENDERING PRIMITIVES
+       ═══════════════════════════════════════════════════════════════ */
+
+    function drawSphereBase(cx, cy, R) {
+      // Limb glow
+      const glowGrad = ctx.createRadialGradient(cx, cy, R * 0.95, cx, cy, R * 1.25);
+      glowGrad.addColorStop(0, 'rgba(232, 200, 114, 0.1)');
+      glowGrad.addColorStop(0.5, 'rgba(110, 130, 155, 0.04)');
+      glowGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = glowGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, R * 1.25, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Sphere with 3D limb darkening
+      const sphereGrad = ctx.createRadialGradient(cx - R * 0.35, cy - R * 0.35, R * 0.1, cx, cy, R);
+      sphereGrad.addColorStop(0, '#1c2436');
+      sphereGrad.addColorStop(0.65, '#10141f');
+      sphereGrad.addColorStop(1, '#07090d');
+
+      ctx.fillStyle = sphereGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Hairline antique rim
+      ctx.strokeStyle = 'rgba(232, 200, 114, 0.32)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    function drawGlobeGraticule(cx, cy, R, yaw, pitch, highlightEquator = true) {
+      // Latitude circles
+      const lats = [-60, -30, 0, 30, 60];
+      lats.forEach(latDeg => {
+        const latRad = (latDeg * Math.PI) / 180;
+        const isEq = latDeg === 0;
+
+        ctx.beginPath();
+        let started = false;
+        const steps = 72;
+        for (let i = 0; i <= steps; i++) {
+          const lonRad = (i / steps) * Math.PI * 2 - Math.PI;
+          const p = project3D(latRad, lonRad, R, cx, cy, yaw, pitch);
+          if (p.visible) {
+            if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+            else { ctx.lineTo(p.x, p.y); }
+          } else {
+            started = false;
+          }
+        }
+        if (isEq && highlightEquator) {
+          ctx.strokeStyle = 'rgba(232, 200, 114, 0.55)';
+          ctx.lineWidth = 1.5;
+        } else {
+          ctx.strokeStyle = 'rgba(110, 130, 155, 0.16)';
+          ctx.lineWidth = 0.8;
+        }
+        ctx.stroke();
+      });
+
+      // Longitude meridians
+      const lons = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330];
+      lons.forEach(lonDeg => {
+        const lonRad = (lonDeg * Math.PI) / 180;
+        ctx.beginPath();
+        let started = false;
+        const steps = 60;
+        for (let i = 0; i <= steps; i++) {
+          const latRad = (i / steps) * Math.PI - Math.PI / 2;
+          const p = project3D(latRad, lonRad, R, cx, cy, yaw, pitch);
+          if (p.visible) {
+            if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+            else { ctx.lineTo(p.x, p.y); }
+          } else {
+            started = false;
+          }
+        }
+        ctx.strokeStyle = 'rgba(110, 130, 155, 0.16)';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      });
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       BEAT RENDERERS
+       ═══════════════════════════════════════════════════════════════ */
+
+    // BEAT 01: "STRAIGHT" — Walkers on gold meridians meeting at pole
+    function renderBeat1(dt) {
+      if (state.b1.playing) {
+        state.b1.progress += state.b1.speed * dt;
+        if (state.b1.progress > 1) state.b1.progress = 1;
+      }
+
+      const cx = width * 0.52;
+      const cy = height * 0.52;
+      const R = Math.min(width, height) * 0.32;
+
+      drawSphereBase(cx, cy, R);
+      drawGlobeGraticule(cx, cy, R, state.yaw, state.pitch);
+
+      const sepRad = (state.b1.separationDeg * Math.PI) / 180;
+      const lon1 = -sepRad / 2;
+      const lon2 = sepRad / 2;
+      const currentLat = state.b1.progress * (Math.PI / 2);
+
+      // Gold great circle tracks
+      [lon1, lon2].forEach(lon => {
+        ctx.beginPath();
+        let started = false;
+        const steps = 40;
+        for (let i = 0; i <= steps; i++) {
+          const lat = (i / steps) * currentLat;
+          const p = project3D(lat, lon, R, cx, cy, state.yaw, state.pitch);
+          if (p.visible) {
+            if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+            else { ctx.lineTo(p.x, p.y); }
+          }
+        }
+        ctx.strokeStyle = 'rgba(232, 200, 114, 0.9)';
+        ctx.lineWidth = 3;
+        ctx.shadowColor = 'rgba(232, 200, 114, 0.5)';
+        ctx.shadowBlur = 8;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      });
+
+      // Separation arc
+      ctx.beginPath();
+      let arcStarted = false;
+      const arcSteps = 24;
+      for (let i = 0; i <= arcSteps; i++) {
+        const lon = lon1 + (i / arcSteps) * (lon2 - lon1);
+        const p = project3D(currentLat, lon, R, cx, cy, state.yaw, state.pitch);
+        if (p.visible) {
+          if (!arcStarted) { ctx.moveTo(p.x, p.y); arcStarted = true; }
+          else { ctx.lineTo(p.x, p.y); }
+        }
+      }
+      ctx.strokeStyle = 'rgba(244, 237, 217, 0.45)';
+      ctx.lineWidth = 1.4;
+      ctx.setLineDash([4, 4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // North Pole Marker
+      const poleP = project3D(Math.PI / 2, 0, R, cx, cy, state.yaw, state.pitch);
+      if (poleP.visible) {
+        ctx.fillStyle = 'rgba(232, 200, 114, 0.3)';
+        ctx.beginPath();
+        ctx.arc(poleP.x, poleP.y, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = 'var(--gold)';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.arc(poleP.x, poleP.y, 3.5, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Two Walkers
+      const p1 = project3D(currentLat, lon1, R, cx, cy, state.yaw, state.pitch);
+      const p2 = project3D(currentLat, lon2, R, cx, cy, state.yaw, state.pitch);
+
+      [p1, p2].forEach(p => {
+        if (p.visible) {
+          ctx.fillStyle = 'rgba(232, 200, 114, 0.35)';
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 9, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#fce7a4';
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#080a0e';
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+    }
+
+    // BEAT 02: "THE MAP" — Split 3D globe vs 2D flat map with crossed-out pull
+    function renderBeat2(dt) {
+      if (state.b2.playing) {
+        state.b2.progress += state.b2.speed * dt;
+        if (state.b2.progress > 1) state.b2.progress = 1;
+      }
+
+      const splitX = width * 0.48;
+      const leftCx = width * 0.24;
+      const leftCy = height * 0.54;
+      const leftR = Math.min(width * 0.36, height * 0.48) * 0.42;
+
+      // Divider
+      ctx.strokeStyle = 'rgba(232, 200, 114, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(splitX, 80);
+      ctx.lineTo(splitX, height - 70);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // LEFT: 3D Globe
+      drawSphereBase(leftCx, leftCy, leftR);
+      drawGlobeGraticule(leftCx, leftCy, leftR, state.yaw, state.pitch);
+
+      ctx.fillStyle = 'var(--gold)';
+      ctx.font = '600 11px Syne';
+      ctx.fillText('3D SPHERE (GEODESIC)', leftCx - 64, leftCy - leftR - 16);
+
+      const sepRad = (45 * Math.PI) / 180;
+      const lon1 = -sepRad / 2;
+      const lon2 = sepRad / 2;
+      const currentLat = state.b2.progress * (Math.PI / 2);
+
+      [lon1, lon2].forEach(lon => {
+        ctx.beginPath();
+        let started = false;
+        for (let i = 0; i <= 30; i++) {
+          const lat = (i / 30) * currentLat;
+          const p = project3D(lat, lon, leftR, leftCx, leftCy, state.yaw, state.pitch);
+          if (p.visible) {
+            if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+            else { ctx.lineTo(p.x, p.y); }
+          }
+        }
+        ctx.strokeStyle = 'rgba(232, 200, 114, 0.9)';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+      });
+
+      // RIGHT: Flat Rectangular Map
+      const mapW = width * 0.42;
+      const mapH = height * 0.50;
+      const mapX = splitX + 32;
+      const mapY = height * 0.54 - mapH / 2;
+
+      ctx.fillStyle = 'rgba(20, 26, 38, 0.7)';
+      ctx.strokeStyle = 'rgba(110, 130, 155, 0.35)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(mapX, mapY, mapW, mapH, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = 'var(--gold)';
+      ctx.font = '600 11px Syne';
+      ctx.fillText('FLAT RECTANGULAR MAP', mapX + 16, mapY - 14);
+
+      // Grid lines on map
+      ctx.strokeStyle = 'rgba(110, 130, 155, 0.15)';
+      ctx.lineWidth = 1;
+      for (let l = 0; l <= 5; l++) {
+        const gy = mapY + (l / 5) * mapH;
+        ctx.beginPath();
+        ctx.moveTo(mapX, gy);
+        ctx.lineTo(mapX + mapW, gy);
+        ctx.stroke();
+      }
+      for (let m = 0; m <= 6; m++) {
+        const gx = mapX + (m / 6) * mapW;
+        ctx.beginPath();
+        ctx.moveTo(gx, mapY);
+        ctx.lineTo(gx, mapY + mapH);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = 'rgba(232, 200, 114, 0.6)';
+      ctx.font = '10px Syne';
+      ctx.fillText('90°N', mapX + 10, mapY + 18);
+      ctx.fillText('0° Equator', mapX + 10, mapY + mapH - 10);
+
+      // Map paths
+      const mapCenterX = mapX + mapW / 2;
+      const mapEquatorY = mapY + mapH;
+      const mapPoleY = mapY + 24;
+
+      const trackX1 = mapCenterX - mapW * 0.25;
+      const trackX2 = mapCenterX + mapW * 0.25;
+      const progressY = mapEquatorY - state.b2.progress * (mapEquatorY - mapPoleY);
+
+      const curMapX1 = trackX1 + (mapCenterX - trackX1) * Math.sin(state.b2.progress * (Math.PI / 2));
+      const curMapX2 = trackX2 - (trackX2 - mapCenterX) * Math.sin(state.b2.progress * (Math.PI / 2));
+
+      // Left Track
+      ctx.beginPath();
+      ctx.moveTo(trackX1, mapEquatorY);
+      ctx.quadraticCurveTo(trackX1, progressY, curMapX1, progressY);
+      ctx.strokeStyle = 'rgba(232, 200, 114, 0.9)';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // Right Track
+      ctx.beginPath();
+      ctx.moveTo(trackX2, mapEquatorY);
+      ctx.quadraticCurveTo(trackX2, progressY, curMapX2, progressY);
+      ctx.stroke();
+
+      // Crossed-out Fake Force Glyph on Map Only
+      if (state.b2.progress > 0.12) {
+        ctx.strokeStyle = 'rgba(230, 74, 46, 0.85)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(curMapX1 + 6, progressY);
+        ctx.lineTo(curMapX2 - 6, progressY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Force Arrow Heads pointing inward
+        ctx.fillStyle = 'var(--vermillion)';
+        ctx.beginPath();
+        ctx.moveTo(curMapX1 + 16, progressY - 4);
+        ctx.lineTo(curMapX1 + 6, progressY);
+        ctx.lineTo(curMapX1 + 16, progressY + 4);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(curMapX2 - 16, progressY - 4);
+        ctx.lineTo(curMapX2 - 6, progressY);
+        ctx.lineTo(curMapX2 - 16, progressY + 4);
+        ctx.fill();
+
+        // Crossed out ⊘ Glyph
+        const tagBoxW = 160;
+        const tagBoxH = 24;
+        const tagBoxX = mapCenterX - tagBoxW / 2;
+        const tagBoxY = progressY - 28;
+
+        ctx.fillStyle = 'rgba(10, 12, 16, 0.92)';
+        ctx.strokeStyle = 'var(--vermillion)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(tagBoxX, tagBoxY, tagBoxW, tagBoxH, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = 'var(--vermillion-bright)';
+        ctx.font = '700 10px Syne';
+        ctx.fillText('✕ NO REAL PULL', tagBoxX + 24, tagBoxY + 16);
+      }
+    }
+
+    // BEAT 03: "ONE ROOM" — Small falling cabin vs planet-scale drop
+    function renderBeat3(dt) {
+      if (state.b3.dropping) {
+        state.b3.dropTime += dt * 0.7;
+        if (state.b3.dropTime > 1.8) state.b3.dropTime = 0;
+      }
+
+      const splitX = width * 0.48;
+
+      ctx.strokeStyle = 'rgba(232, 200, 114, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(splitX, 80);
+      ctx.lineTo(splitX, height - 70);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // LEFT: LOCAL CABIN
+      const leftW = width * 0.38;
+      const leftH = height * 0.52;
+      const leftX = width * 0.06;
+      const leftY = height * 0.54 - leftH / 2;
+
+      ctx.fillStyle = 'rgba(18, 23, 34, 0.65)';
+      ctx.strokeStyle = 'var(--slate-border)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(leftX, leftY, leftW, leftH, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = 'var(--gold)';
+      ctx.font = '700 11px Syne';
+      ctx.fillText('LOCAL CABIN (FREE FALL)', leftX + 18, leftY + 26);
+
+      // Inner elevator frame
+      const cabW = leftW * 0.72;
+      const cabH = leftH * 0.60;
+      const cabX = leftX + (leftW - cabW) / 2;
+      const cabY = leftY + 45;
+
+      ctx.strokeStyle = 'rgba(232, 200, 114, 0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(cabX, cabY, cabW, cabH, 6);
+      ctx.stroke();
+
+      // Two Pens staying parallel
+      const pen1X = cabX + cabW * 0.32;
+      const pen2X = cabX + cabW * 0.68;
+      const penY = cabY + cabH * 0.50;
+
+      [pen1X, pen2X].forEach(px => {
+        ctx.fillStyle = '#fce7a4';
+        ctx.beginPath();
+        ctx.roundRect(px - 14, penY - 3, 28, 6, 3);
+        ctx.fill();
+      });
+
+      // Parallel link line
+      ctx.strokeStyle = 'rgba(232, 200, 114, 0.45)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(pen1X, penY);
+      ctx.lineTo(pen2X, penY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = 'var(--gold-bright)';
+      ctx.font = '600 11px Syne';
+      ctx.fillText('LOCAL: Pens stay parallel', leftX + 24, leftY + leftH - 20);
+
+      // RIGHT: EARTH-SCALE DROP
+      const rightW = width * 0.42;
+      const rightH = height * 0.52;
+      const rightX = splitX + 32;
+      const rightY = height * 0.54 - rightH / 2;
+
+      ctx.fillStyle = 'rgba(18, 23, 34, 0.65)';
+      ctx.strokeStyle = 'var(--slate-border)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(rightX, rightY, rightW, rightH, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = 'var(--gold)';
+      ctx.font = '700 11px Syne';
+      ctx.fillText('PLANET-SCALE (TIDAL DEVIATION)', rightX + 18, rightY + 26);
+
+      // Earth at bottom
+      const earthCx = rightX + rightW / 2;
+      const earthCy = rightY + rightH * 0.78;
+      const earthR = rightW * 0.22;
+
+      drawSphereBase(earthCx, earthCy, earthR);
+      drawGlobeGraticule(earthCx, earthCy, earthR, state.yaw, state.pitch, false);
+
+      // Two masses dropping toward center
+      const dropProgress = (state.b3.dropTime % 1.0);
+      const startR = earthR * 2.2;
+      const curR = startR - dropProgress * (startR - earthR * 1.06);
+
+      const angle1 = -Math.PI * 0.68;
+      const angle2 = -Math.PI * 0.32;
+
+      const m1X = earthCx + Math.cos(angle1) * curR;
+      const m1Y = earthCy + Math.sin(angle1) * curR;
+      const m2X = earthCx + Math.cos(angle2) * curR;
+      const m2Y = earthCy + Math.sin(angle2) * curR;
+
+      // Radial drop lines
+      ctx.strokeStyle = 'rgba(232, 200, 114, 0.35)';
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(earthCx + Math.cos(angle1) * startR, earthCy + Math.sin(angle1) * startR);
+      ctx.lineTo(earthCx + Math.cos(angle1) * earthR, earthCy + Math.sin(angle1) * earthR);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(earthCx + Math.cos(angle2) * startR, earthCy + Math.sin(angle2) * startR);
+      ctx.lineTo(earthCx + Math.cos(angle2) * earthR, earthCy + Math.sin(angle2) * earthR);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Masses
+      [ {x: m1X, y: m1Y}, {x: m2X, y: m2Y} ].forEach(m => {
+        ctx.fillStyle = '#fce7a4';
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Converging line
+      ctx.strokeStyle = 'rgba(230, 74, 46, 0.75)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(m1X, m1Y);
+      ctx.lineTo(m2X, m2Y);
+      ctx.stroke();
+
+      ctx.fillStyle = 'var(--vermillion-bright)';
+      ctx.font = '600 11px Syne';
+      ctx.fillText('GLOBAL: Distance shrinks toward center', rightX + 24, rightY + rightH - 20);
+    }
+
+    // BEAT 04: "LOCAL UP" — Constant Radius Sphere with 12 Observers & Latitude Dual
+    function renderBeat4(dt) {
+      state.b4.thrustFlicker += dt * 14;
+      state.b4.latTime += dt * 0.35;
+
+      const cx = width * 0.52;
+      const cy = height * 0.52;
+      const R = Math.min(width, height) * 0.32;
+
+      if (state.b4.mode === 'radial') {
+        // RADIAL PROPER ACCELERATION ON CONSTANT SPHERE
+        drawSphereBase(cx, cy, R);
+        drawGlobeGraticule(cx, cy, R, state.yaw, state.pitch);
+
+        const observers = [
+          { lat: 0, lon: 0, id: "01" },
+          { lat: 0, lon: Math.PI / 2, id: "02" },
+          { lat: 0, lon: Math.PI, id: "03" },
+          { lat: 0, lon: -Math.PI / 2, id: "04" },
+          { lat: Math.PI / 4, lon: Math.PI / 4, id: "05" },
+          { lat: Math.PI / 4, lon: -3 * Math.PI / 4, id: "06" },
+          { lat: -Math.PI / 4, lon: -Math.PI / 4, id: "07" },
+          { lat: -Math.PI / 4, lon: 3 * Math.PI / 4, id: "08" },
+          { lat: Math.PI / 2 * 0.85, lon: 0, id: "North" },
+          { lat: -Math.PI / 2 * 0.85, lon: 0, id: "South" },
+          { lat: Math.PI / 3, lon: Math.PI, id: "11" },
+          { lat: -Math.PI / 3, lon: Math.PI, id: "12" },
+        ];
+
+        // Highlight Opposite Antipodal Pair
+        if (state.b4.highlightAntipodes) {
+          const pNorth = project3D(Math.PI / 2 * 0.85, 0, R, cx, cy, state.yaw, state.pitch);
+          const pSouth = project3D(-Math.PI / 2 * 0.85, 0, R, cx, cy, state.yaw, state.pitch);
+
+          ctx.strokeStyle = 'rgba(244, 237, 217, 0.4)';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(pNorth.x, pNorth.y);
+          ctx.lineTo(pSouth.x, pSouth.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          ctx.fillStyle = 'var(--text-main)';
+          ctx.font = '600 11px Syne';
+          ctx.fillText('DIAMETER FIXED (2R = CONSTANT)', cx - 88, cy + R + 26);
+        }
+
+        // 12 Observers with radial outward vermillion arrows + thrust flicker
+        observers.forEach((obs, idx) => {
+          const p = project3D(obs.lat, obs.lon, R, cx, cy, state.yaw, state.pitch);
+          if (p.visible) {
+            const isAntipode = state.b4.highlightAntipodes && (obs.id === "North" || obs.id === "South");
+            const thrustLen = 32 + Math.sin(state.b4.thrustFlicker + idx) * 4;
+
+            const arrowEndX = p.x + p.normalX * thrustLen;
+            const arrowEndY = p.y - p.normalY * thrustLen;
+
+            // Thrust flame flicker at feet
+            ctx.fillStyle = 'rgba(230, 74, 46, 0.6)';
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 4 + Math.sin(state.b4.thrustFlicker * 1.5 + idx) * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Proper Acceleration Arrow
+            ctx.strokeStyle = isAntipode ? 'var(--vermillion-bright)' : 'rgba(230, 74, 46, 0.9)';
+            ctx.lineWidth = isAntipode ? 2.8 : 2;
+            ctx.shadowColor = 'rgba(230, 74, 46, 0.5)';
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(arrowEndX, arrowEndY);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            // Arrow Head
+            ctx.fillStyle = 'var(--vermillion-bright)';
+            ctx.beginPath();
+            ctx.arc(arrowEndX, arrowEndY, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Person dot
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        });
+
+      } else {
+        // LATITUDE DUAL: Spacetime Model
+        drawSphereBase(cx, cy, R);
+        drawGlobeGraticule(cx, cy, R, state.yaw, state.pitch, true);
+
+        const latN = (15 * Math.PI) / 180;
+        const latS = (-15 * Math.PI) / 180;
+
+        // Latitude circles (Parallel Tracks)
+        [latN, latS].forEach(latRad => {
+          ctx.beginPath();
+          let started = false;
+          for (let i = 0; i <= 60; i++) {
+            const lon = (i / 60) * Math.PI * 2 - Math.PI;
+            const p = project3D(latRad, lon, R, cx, cy, state.yaw, state.pitch);
+            if (p.visible) {
+              if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+              else { ctx.lineTo(p.x, p.y); }
+            }
+          }
+          ctx.strokeStyle = 'rgba(230, 74, 46, 0.75)';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        });
+
+        // Two Walkers moving eastward along latitudes
+        const currentLon = (state.b4.latTime % (Math.PI * 2)) - Math.PI;
+        const pN = project3D(latN, currentLon, R, cx, cy, state.yaw, state.pitch);
+        const pS = project3D(latS, currentLon, R, cx, cy, state.yaw, state.pitch);
+
+        if (pN.visible) {
+          ctx.fillStyle = '#ff6e54';
+          ctx.beginPath();
+          ctx.arc(pN.x, pN.y, 5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Steering outward vector (North)
+          const pSteerN = project3D(latN + 0.14, currentLon, R, cx, cy, state.yaw, state.pitch);
+          ctx.strokeStyle = 'var(--vermillion-bright)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(pN.x, pN.y);
+          ctx.lineTo(pSteerN.x, pSteerN.y);
+          ctx.stroke();
+        }
+
+        if (pS.visible) {
+          ctx.fillStyle = '#ff6e54';
+          ctx.beginPath();
+          ctx.arc(pS.x, pS.y, 5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Steering outward vector (South)
+          const pSteerS = project3D(latS - 0.14, currentLon, R, cx, cy, state.yaw, state.pitch);
+          ctx.strokeStyle = 'var(--vermillion-bright)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(pS.x, pS.y);
+          ctx.lineTo(pSteerS.x, pSteerS.y);
+          ctx.stroke();
+        }
+
+        // Distance lock line
+        if (pN.visible && pS.visible) {
+          ctx.strokeStyle = 'rgba(244, 237, 217, 0.4)';
+          ctx.lineWidth = 1.4;
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(pN.x, pN.y);
+          ctx.lineTo(pS.x, pS.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        // Equator label
+        const pEq = project3D(0, currentLon, R, cx, cy, state.yaw, state.pitch);
+        if (pEq.visible) {
+          ctx.fillStyle = 'var(--gold)';
+          ctx.font = '600 10px Syne';
+          ctx.fillText('EQUATOR (GEODESIC)', pEq.x + 10, pEq.y + 4);
+        }
+      }
+    }
+
+    // BEAT 05: "NO GLOBAL FRAME" — Local Frames Disagree & Global Grid Tears
+    function renderBeat5(dt) {
+      if (state.autoRotate) {
+        state.targetYaw += dt * 0.22;
+      }
+
+      const cx = width * 0.52;
+      const cy = height * 0.50;
+      const R = Math.min(width, height) * 0.32;
+
+      drawSphereBase(cx, cy, R);
+      drawGlobeGraticule(cx, cy, R, state.yaw, state.pitch);
+
+      if (state.b5.mode === 'local_frames') {
+        // Multiple local inertial patch frames
+        const frameLocations = [
+          { lat: 0, lon: 0 },
+          { lat: 0, lon: Math.PI / 2 },
+          { lat: 0, lon: Math.PI },
+          { lat: 0, lon: -Math.PI / 2 },
+          { lat: Math.PI / 3, lon: Math.PI / 4 },
+          { lat: Math.PI / 3, lon: -3 * Math.PI / 4 },
+          { lat: -Math.PI / 3, lon: -Math.PI / 4 },
+          { lat: -Math.PI / 3, lon: 3 * Math.PI / 4 },
+          { lat: Math.PI / 2 * 0.88, lon: 0 },
+          { lat: -Math.PI / 2 * 0.88, lon: 0 }
+        ];
+
+        frameLocations.forEach((loc, idx) => {
+          const p = project3D(loc.lat, loc.lon, R, cx, cy, state.yaw, state.pitch);
+          if (p.visible) {
+            const axisLen = 26;
+
+            // Radial axis
+            const erX = p.x + p.normalX * axisLen;
+            const erY = p.y - p.normalY * axisLen;
+
+            ctx.strokeStyle = 'var(--vermillion)';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(erX, erY);
+            ctx.stroke();
+
+            // Tangent axis
+            const pTheta = project3D(loc.lat + 0.12, loc.lon, R, cx, cy, state.yaw, state.pitch);
+            ctx.strokeStyle = 'var(--gold)';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(pTheta.x, pTheta.y);
+            ctx.stroke();
+
+            // Local frame box
+            ctx.fillStyle = 'rgba(232, 200, 114, 0.15)';
+            ctx.strokeStyle = 'rgba(232, 200, 114, 0.6)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          }
+        });
+
+      } else {
+        // Torn global Cartesian grid
+        state.b5.tearFactor = Math.min(1, state.b5.tearFactor + dt * 0.6);
+
+        ctx.strokeStyle = 'rgba(230, 74, 46, 0.4)';
+        ctx.lineWidth = 1.2;
+        const gridSteps = 14;
+        for (let i = -gridSteps; i <= gridSteps; i++) {
+          const gx = cx + (i / gridSteps) * R * 1.3;
+          ctx.beginPath();
+          ctx.moveTo(gx, cy - R * 1.3);
+          const tear = Math.sin(i * 0.55) * 22 * state.b5.tearFactor;
+          ctx.lineTo(gx + tear, cy + R * 1.3);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = 'var(--vermillion-bright)';
+        ctx.font = '700 11px Syne';
+        ctx.fillText('GLOBAL FLAT GRID TEARS ON CURVED MANIFOLD', cx - 130, cy + R + 28);
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       ANIMATION LOOP WITH FILM GRAIN OVERLAY
+       ═══════════════════════════════════════════════════════════════ */
+
+    let lastTime = performance.now();
+
+    function render(time) {
+      const dt = Math.min(0.1, (time - lastTime) / 1000);
+      lastTime = time;
+
+      state.yaw += (state.targetYaw - state.yaw) * 0.12;
+      state.pitch += (state.targetPitch - state.pitch) * 0.12;
+
+      ctx.clearRect(0, 0, width, height);
+
+      switch (state.currentBeat) {
+        case 1: renderBeat1(dt); break;
+        case 2: renderBeat2(dt); break;
+        case 3: renderBeat3(dt); break;
+        case 4: renderBeat4(dt); break;
+        case 5: renderBeat5(dt); break;
+      }
+
+      // Film Grain Overlay
+      if (grainPattern) {
+        ctx.fillStyle = grainPattern;
+        ctx.fillRect(0, 0, width, height);
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    requestAnimationFrame(render);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        state.b1.playing = false;
+        state.b2.playing = false;
+      }
+    });
+
+  </script>
+</body>
+</html>

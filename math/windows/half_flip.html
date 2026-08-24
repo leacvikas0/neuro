@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>The Half-Flip</title>
+    <style>
+        body { background: #111; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        svg { overflow: visible; }
+        .axis { stroke: #444; stroke-width: 2; }
+        .tick { stroke: #444; stroke-width: 2; }
+        .label { fill: #888; font-size: 16px; text-anchor: middle; font-family: monospace; }
+        
+        #arrow { 
+            stroke: #00ffcc; 
+            stroke-width: 4; 
+            fill: none; 
+            stroke-linecap: round; stroke-linejoin: round;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
+            transform-origin: 0 0; 
+        }
+        
+        .button { background: #222; border: 1px solid #555; color: #fff; padding: 16px 32px; font-size: 20px; border-radius: 8px; cursor: pointer; margin-top: 60px; transition: 0.2s; font-family: monospace;}
+        .button:hover { background: #333; border-color: #00ffcc; color: #00ffcc; }
+        
+        .equation { font-size: 28px; font-family: monospace; margin-top: 30px; color: #aaa; text-align: center;}
+        .highlight { color: #00ffcc; font-weight: bold; }
+        .history { font-size: 18px; color: #666; font-family: monospace; margin-top: 10px; min-height: 24px;}
+    </style>
+</head>
+<body>
+    <svg width="400" height="400" viewBox="-200 -200 400 400">
+        <!-- X Axis Grid -->
+        <line class="axis" x1="-200" y1="0" x2="200" y2="0" />
+        <!-- Y Axis Grid -->
+        <line class="axis" x1="0" y1="-200" x2="0" y2="200" />
+        
+        <!-- Ticks and Labels X -->
+        <script>
+            for(let i=-3; i<=3; i++) {
+                if(i !== 0) {
+                    document.write(`<line class="tick" x1="${i*50}" y1="-5" x2="${i*50}" y2="5" />`);
+                    document.write(`<text class="label" x="${i*50}" y="25">${i}</text>`);
+                }
+            }
+            // Ticks and Labels Y
+            for(let i=-3; i<=3; i++) {
+                if(i !== 0) {
+                    document.write(`<line class="tick" x1="-5" y1="${i*50}" x2="5" y2="${i*50}" />`);
+                }
+            }
+        </script>
+        
+        <!-- Center Dot -->
+        <circle cx="0" cy="0" r="4" fill="#fff" />
+
+        <!-- The Action Arrow (starts at 1) -->
+        <g id="arrowGroup">
+            <!-- 50px = 1 unit -->
+            <path id="arrow" d="M 0 0 L 50 0 L 40 -10 M 50 0 L 40 10" />
+        </g>
+    </svg>
+
+    <div class="equation" id="eq">State: <span class="highlight">1</span></div>
+    <div class="history" id="hist">Waiting for action...</div>
+    <button class="button" onclick="applyHalfFlip()">Action: Half-Flip (90°)</button>
+
+    <script>
+        let currentRotations = 0;
+        const states = [
+            "1",
+            "Top (The vertical axis)",
+            "-1",
+            "Bottom (The vertical axis)"
+        ];
+
+        function applyHalfFlip() {
+            currentRotations += 1;
+            
+            // Rotate 90 degrees counter-clockwise visually (which is -90 in CSS)
+            let deg = currentRotations * -90; 
+            document.getElementById('arrow').style.transform = `rotate(${deg}deg)`;
+            
+            let currentStateIndex = currentRotations % 4;
+            let currentStateText = states[currentStateIndex];
+            
+            document.getElementById('eq').innerHTML = `State: <span class="highlight">${currentStateText}</span>`;
+            document.getElementById('hist').innerHTML = `Applied one Half-Flip.`;
+        }
+    </script>
+</body>
+</html>

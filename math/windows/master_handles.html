@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>The Master Handles</title>
+    <style>
+        body { 
+            background: #111; 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+            font-family: monospace; 
+            overflow: hidden;
+        }
+        .container { 
+            position: relative; 
+            width: 500px; 
+            height: 500px; 
+            border: 2px solid #444; 
+            margin-bottom: 20px; 
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        
+        #universe {
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            width: 0; 
+            height: 0; 
+        }
+
+        .grid { 
+            position: absolute; 
+            top: -1000px; 
+            left: -1000px; 
+            width: 2000px; 
+            height: 2000px;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            background-position: center center;
+        }
+        
+        .axis-x { 
+            position: absolute; 
+            top: -2px; left: -1000px; width: 2000px; height: 4px; 
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .axis-y { 
+            position: absolute; 
+            top: -1000px; left: -2px; width: 4px; height: 2000px; 
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* The Handles */
+        #pink-line {
+            position: absolute;
+            top: 0; left: 0; height: 4px; background: #ff3366;
+            transform-origin: 0 50%;
+            margin-top: -2px;
+            width: 50px; /* 1 unit */
+        }
+        #blue-line {
+            position: absolute;
+            top: 0; left: 0; width: 4px; background: #00ffcc;
+            transform-origin: 50% 0;
+            margin-left: -2px;
+            height: 50px; /* 1 unit */
+            /* Pointing up visually in standard math is negative Y in DOM, handled in JS */
+        }
+
+        .dot-pink {
+            position: absolute;
+            width: 16px; height: 16px; background: #ff3366; border-radius: 50%;
+            top: -6px; left: 42px;
+        }
+        
+        .dot-blue {
+            position: absolute;
+            width: 16px; height: 16px; background: #00ffcc; border-radius: 50%;
+            top: 42px; left: -6px;
+        }
+
+        /* UI Controls */
+        .controls {
+            display: flex;
+            gap: 40px;
+            background: #222;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .slider-container { 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            font-size: 16px; 
+        }
+        
+        input[type=range] { 
+            width: 150px; 
+            cursor: pointer; 
+        }
+
+        .pink-text { color: #ff3366; font-weight: bold; font-size: 20px; }
+        .blue-text { color: #00ffcc; font-weight: bold; font-size: 20px; }
+
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <!-- Everything is inside universe, which is centered at 50% 50% -->
+        <div id="universe">
+            <div class="grid"></div>
+            <div class="axis-x"></div>
+            <div class="axis-y"></div>
+            
+            <!-- Vectors -->
+            <div id="pink-line"><div class="dot-pink"></div></div>
+            <div id="blue-line"><div class="dot-blue"></div></div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <div class="control-group" style="border-right: 2px solid #444; padding-right: 40px;">
+            <div class="pink-text">Pink Handle</div>
+            <div class="slider-container">
+                <label>X Position</label>
+                <input type="range" id="pX" min="-3" max="3" step="0.1" value="1" oninput="updateSpace()">
+                <span id="v_pX">1.0</span>
+            </div>
+            <div class="slider-container">
+                <label>Y Position</label>
+                <input type="range" id="pY" min="-3" max="3" step="0.1" value="0" oninput="updateSpace()">
+                <span id="v_pY">0.0</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="blue-text">Blue Handle</div>
+            <div class="slider-container">
+                <label>X Position</label>
+                <input type="range" id="bX" min="-3" max="3" step="0.1" value="0" oninput="updateSpace()">
+                <span id="v_bX">0.0</span>
+            </div>
+            <div class="slider-container">
+                <label>Y Position</label>
+                <input type="range" id="bY" min="-3" max="3" step="0.1" value="1" oninput="updateSpace()">
+                <span id="v_bY">1.0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateSpace() {
+            let pX = parseFloat(document.getElementById('pX').value);
+            let pY = parseFloat(document.getElementById('pY').value);
+            let bX = parseFloat(document.getElementById('bX').value);
+            let bY = parseFloat(document.getElementById('bY').value);
+            
+            document.getElementById('v_pX').innerText = pX.toFixed(1);
+            document.getElementById('v_pY').innerText = pY.toFixed(1);
+            document.getElementById('v_bX').innerText = bX.toFixed(1);
+            document.getElementById('v_bY').innerText = bY.toFixed(1);
+            
+            // In CSS Matrix: matrix(scaleX, skewY, skewX, scaleY, translateX, translateY)
+            // But DOM Y goes down, standard math Y goes up. 
+            // We'll flip the signs for Y inputs so it feels like normal math graph.
+            // Actually, to keep it perfectly mapped to the grid visual, we apply the matrix to the whole universe.
+            
+            // Mathematical matrix:
+            // [ pX  bX ]
+            // [ pY  bY ]
+            
+            // DOM matrix mapping (accounting for Y going down):
+            // The X axis handle (Pink) controls scaleX (pX) and skewY (-pY)
+            // The Y axis handle (Blue) controls skewX (bX) and scaleY (-bY)
+            
+            document.getElementById('universe').style.transform = `matrix(${pX}, ${-pY}, ${bX}, ${-bY}, 0, 0)`;
+            
+            // We also need to keep the visual lines mapped to 1 unit (50px).
+            // Actually, because they are inside the universe, they stretch automatically! 
+            // But wait, if they stretch automatically, they will deform (dots become ovals).
+            // For a pure visualization, letting them stretch with the universe is actually a great way to show it.
+        }
+        
+        // Initialize
+        updateSpace();
+    </script>
+</body>
+</html>

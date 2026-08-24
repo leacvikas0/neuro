@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>The Inverter</title>
+    <style>
+        body { background: #111; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        svg { overflow: visible; }
+        .axis { stroke: #444; stroke-width: 2; }
+        .tick { stroke: #444; stroke-width: 2; }
+        .label { fill: #888; font-size: 16px; text-anchor: middle; font-family: monospace; }
+        
+        #arrow { 
+            stroke: #00ffcc; 
+            stroke-width: 4; 
+            fill: none; 
+            stroke-linecap: round; stroke-linejoin: round;
+            /* Smooth sweeping rotation */
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
+            transform-origin: 0 0; 
+        }
+        
+        .button { background: #222; border: 1px solid #555; color: #fff; padding: 16px 32px; font-size: 20px; border-radius: 8px; cursor: pointer; margin-top: 60px; transition: 0.2s; font-family: monospace;}
+        .button:hover { background: #333; border-color: #00ffcc; color: #00ffcc; }
+        
+        .equation { font-size: 28px; font-family: monospace; margin-top: 30px; color: #aaa; }
+        .highlight { color: #00ffcc; font-weight: bold; }
+        .history { font-size: 18px; color: #666; font-family: monospace; margin-top: 20px; min-height: 24px;}
+    </style>
+</head>
+<body>
+    <svg width="600" height="200" viewBox="-300 -100 600 200">
+        <!-- X Axis Grid -->
+        <line class="axis" x1="-300" y1="0" x2="300" y2="0" />
+        
+        <!-- Ticks and Labels -->
+        <script>
+            for(let i=-5; i<=5; i++) {
+                document.write(`<line class="tick" x1="${i*50}" y1="-8" x2="${i*50}" y2="8" />`);
+                if(i !== 0) document.write(`<text class="label" x="${i*50}" y="35">${i}</text>`);
+            }
+        </script>
+        <text class="label" x="0" y="35">0</text>
+        
+        <!-- The Action Arrow (starts at 1) -->
+        <g id="arrowGroup">
+            <path id="arrow" d="M 0 0 L 50 0 L 40 -10 M 50 0 L 40 10" />
+        </g>
+        
+        <!-- Center Dot -->
+        <circle cx="0" cy="0" r="4" fill="#fff" />
+    </svg>
+
+    <div class="equation" id="eq">Current: <span class="highlight">1</span></div>
+    <div class="history" id="hist"></div>
+    <button class="button" onclick="multiplyByNegativeOne()">Action: × (-1)</button>
+
+    <script>
+        let currentVal = 1;
+        let currentRotation = 0;
+
+        function multiplyByNegativeOne() {
+            let prevVal = currentVal;
+            currentVal = currentVal * -1;
+            
+            // The magic: multiplying by -1 is purely a 180-degree rotation in space
+            currentRotation -= 180; 
+            
+            document.getElementById('arrow').style.transform = `rotate(${currentRotation}deg)`;
+            document.getElementById('eq').innerHTML = `Current: <span class="highlight">${currentVal}</span>`;
+            document.getElementById('hist').innerHTML = `${prevVal} × (-1) = ${currentVal}`;
+        }
+    </script>
+</body>
+</html>

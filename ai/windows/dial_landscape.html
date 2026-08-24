@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The Dial and The Bowl</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ececec;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 40px;
+            max-width: 900px;
+            width: 100%;
+        }
+        .machine-panel, .graph-panel {
+            background-color: #2a2a2a;
+            padding: 30px;
+            border-radius: 12px;
+            flex: 1;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        h2 {
+            margin-top: 0;
+            font-weight: 500;
+            letter-spacing: 1px;
+            color: #fff;
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+        .value {
+            font-family: monospace;
+            color: #4da6ff;
+            font-weight: bold;
+        }
+        .loss-value {
+            color: #ff4d4d;
+        }
+        input[type=range] {
+            width: 100%;
+            margin-top: 10px;
+        }
+        canvas {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            width: 100%;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="machine-panel">
+            <h2>The Machine</h2>
+            
+            <div class="row">
+                <span>Input (x)</span>
+                <span class="value">3.00</span>
+            </div>
+            
+            <div class="row" style="border-bottom: 1px solid #444; padding-bottom: 20px;">
+                <div style="width: 100%;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Weight Dial (w)</span>
+                        <span class="value" id="weight-val">0.50</span>
+                    </div>
+                    <input type="range" id="weight-slider" min="-2" max="6" step="0.01" value="0.5">
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 20px;">
+                <span>Output (w * x)</span>
+                <span class="value" id="output-val">1.50</span>
+            </div>
+
+            <div class="row">
+                <span>Target (y)</span>
+                <span class="value">6.00</span>
+            </div>
+
+            <div class="row" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #444;">
+                <span>Loss (Target - Output)²</span>
+                <span class="value loss-value" id="loss-val">20.25</span>
+            </div>
+        </div>
+
+        <div class="graph-panel">
+            <h2>The Loss Compass</h2>
+            <canvas id="lossCanvas" width="400" height="300"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const input = 3;
+        const target = 6;
+        
+        const weightSlider = document.getElementById('weight-slider');
+        const weightVal = document.getElementById('weight-val');
+        const outputVal = document.getElementById('output-val');
+        const lossVal = document.getElementById('loss-val');
+        const canvas = document.getElementById('lossCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // History of visited weights to draw the trail
+        let visited = new Set();
+
+        function calculateLoss(w) {
+            const out = w * input;
+            // Using Mean Squared Error shape for a clear bowl
+            return Math.pow(target - out, 2);
+        }
+
+        function drawGraph(currentW) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const minW = -2;
+            const maxW = 6;
+            const maxLoss = calculateLoss(minW); // Loss is highest at the edges
+
+            function mapW(w) {
+                return ((w - minW) / (maxW - minW)) * canvas.width;
+            }
+            
+            function mapLoss(l) {
+                // leave some margin
+                const margin = 20;
+                const usableHeight = canvas.height - margin * 2;
+                return canvas.height - margin - (l / maxLoss) * usableHeight;
+            }
+
+            // Draw the underlying theoretical bowl (faint)
+            ctx.beginPath();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            for(let w = minW; w <= maxW; w += 0.1) {
+                const x = mapW(w);
+                const y = mapLoss(calculateLoss(w));
+                if (w === minW) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Draw visited trail
+            visited.forEach(w => {
+                ctx.beginPath();
+                ctx.arc(mapW(w), mapLoss(calculateLoss(w)), 2, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 77, 77, 0.3)';
+                ctx.fill();
+            });
+
+            // Draw current position
+            const currX = mapW(currentW);
+            const currY = mapLoss(calculateLoss(currentW));
+            
+            // Draw lines to axes
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = '#666';
+            ctx.moveTo(currX, canvas.height);
+            ctx.lineTo(currX, currY);
+            ctx.lineTo(0, currY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw point
+            ctx.beginPath();
+            ctx.arc(currX, currY, 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#ff4d4d';
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function update() {
+            const w = parseFloat(weightSlider.value);
+            const out = w * input;
+            const loss = calculateLoss(w);
+
+            weightVal.textContent = w.toFixed(2);
+            outputVal.textContent = out.toFixed(2);
+            lossVal.textContent = loss.toFixed(2);
+
+            visited.add(w);
+            drawGraph(w);
+        }
+
+        weightSlider.addEventListener('input', update);
+        update(); // initial draw
+    </script>
+</body>
+</html>

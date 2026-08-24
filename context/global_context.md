@@ -1,48 +1,19 @@
-# Global Context — Vikas's Learning Brain
+# Global Context
 
-*Shared across all teachers. Updated at the end of each session.*
+## User Profile
+- **Name:** Vikas
+- **Age:** 21
+- **Location:** India
+- **Background:** Self-taught cognitive theorist and AI builder.
+- **Learning Style:** Spatial, physical, bottom-up. Needs to see the mechanism break before learning the theory. No jargon until intuition locks.
+- **Autonomy:** Vikas directs the lab. He decides when to learn foundational math and when to apply it to AI. 
 
-## Vikas — How He Learns
-- Geometry and visuals over symbols
-- Storytelling and historical context over textbook structure
-- Predict → test → surprise → understand
-- Names come LAST, after understanding
-- Loves the hunt. Leave trails, don't hand answers.
-- All love, all flowers. Learning = play, never stress.
-- Don't overpersonalize. Don't over-connect between subjects.
-- ONE concept at a time. Scene-setting. Let him guess FIRST.
-- NO info-dumping. He hates it. Slow down, enjoy.
+## Subject Status
+- **Math:** Built spatial intuitions for Determinants, Basis Vectors, and compounding rotations (Epicycles). Parked until user selects it.
+- **AI:** 1-dial machine fully owned — user derived the learning loop (loss compass, nudge = input × loss, learning-rate brakes, stopping condition) and trained it in `ai/train.py` (dial reached 39.953, target 40). Completed an honest co-discovery audit of the process. Next: the second dial (two inputs sharing one output).
+- **Neuroscience:** Shifted to curiosity-driven investigation of mysteries. Bypassed textbook menus. Derived whole-brain macro-architecture from transection/lesion data. 
+- **Physics/Chemistry:** (Pending) Needs to explain how a fat balloon in salt water creates a -70mV battery (Resting Membrane Potential / Ion Pumps). Vikas deferred this from Neuro.
 
-## What's Been Covered
-
-### Neuroscience
-- Psychology's broken foundations (replication crisis, p-hacking, DSM problems, therapy wars, serotonin myth)
-- Emotion theory (Ekman → Barrett constructed emotions)
-- DMN anatomy (mPFC, PCC, angular gyrus, lateral temporal, hippocampus)
-- All major neurotransmitters: glutamate, GABA, dopamine, serotonin, NE, ACh, endocannabinoids
-- Ionotropic vs metabotropic receptors (why glutamate is fast, dopamine is slow)
-- Resting potential, action potential, Na⁺/K⁺ pump, myelination
-- Dopamine reward circuit deep dive (VTA → NAc → basal ganglia, D1/D2 pathways, prediction error)
-- Serotonin receptor subtypes (14 types, 5-HT2A = cortical plasticity)
-- Dopamine-serotonin opposition (GO vs ENOUGH — Stanford 2024)
-- Basal ganglia as action SELECTION system (release brakes, not send commands)
-- James-Lange insight: wanting is motor readiness interpreted as feeling (he figured this out independently)
-- Memory: reconsolidation, pattern completion/separation, smell vs vision pathways
-- Predictive processing (brain predicts first, checks against reality)
-- Neuroplasticity, psilocybin, SSRIs mechanisms
-- Latest 2025-2026 findings (dopamine surgical precision, NMDA pools, mitochondria mapping)
-
-### Physics
-- Understood pressure intuitively (force spread over area)
-- Connected pressure shape to torque shape (same structure: concentrate → intensify)
-- No formal physics sessions yet
-
-### Math
-- Started exploring multiplication as area (geometry of multiplication)
-- No formal sessions yet
-
-### Chemistry
-- No sessions yet
-
-### AI
-- 2026-07-26: FULL RESTART. All past AI attempts discarded — Vikas's verdict: fragmented, random topics, no coherence, made things harder. Standing directive: ONE continuous thread, every concept kept VISIBLE and experiential, exercise builds that keep the concept on screen. Mentor = veteran model-builder; goal = diffusion + transformers understood fundamentally (math, why, code), Python taught alongside as the instrument. Learning plan being designed together, from zero.
+## Open Threads
+- **Message to Physics/Chem Agent from Neuro:** "Vikas wants to understand how the brain's pump works from first principles—how water, fat, and salt ions create a -70mV charge across a membrane. Build the physical/chemical intuition for this battery before Neuro takes back over to use it for signal routing."
+- **Chemistry pedagogy:** After Vikas derives an answer, explicitly lock the solved conclusion and give an earned win before opening another question; nonstop questioning leaves resolved concepts feeling uncertain.
