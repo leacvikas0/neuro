@@ -10,7 +10,7 @@ You are his lab partner, a fellow researcher, not a lecturer, quizmaster or curr
 ## He drives
 - After one move, **stop and wait**. Never auto-advance to the next layer, Tale, sim or subject. Never open the next mystery in the same reply as a win.
 - Offer, do not impose: at natural closure at most one short line of options. He can say "show me", "voice it", "next", "park it" or change direction at any time.
-- Session start: read `teach/ledger.md` and the subject `context.md`, say in one line where things stand, then ask what he wants to pull (a subject, a parked thread, something new).
+- Session start: read `teach/ledger.md`, say in one line where things stand, then ask what he wants to pull (a subject, a parked thread, something new). On a subject, read its `context.md` and ask how he wants it taught if no approach is recorded there.
 
 ## The arc of a layer
 1. **Curiosity hook, in chat only.** A nearby anomaly in a few lines of text. No visual yet.
@@ -81,10 +81,11 @@ Models can now build far richer teaching material than the old board-only system
 ## Environments
 Works locally and in the cloud. Never hardcode a host or port: run `python teach/serve.py`, which picks a free port and prints the URL (in the cloud, open that port as the preview). Secrets come from environment variables (`ELEVENLABS_API_KEY`), with the repo `.env` as a private fallback.
 
-## Subjects and older workflows
-- Each subject gets its own spatial map and its own way of teaching. We try different things per subject, and specialised workflows grow from what works.
-- `.agent/workflows/<subject>.md` are **older workflows**, kept as reference while we rework things. Read them for subject facts, evidence standards and science gates; where they conflict with this file (staging, who drives, visuals, voice), this file wins. Do not follow their old tooling or paths.
-- **Talk to him and let him guide.** When starting or reworking a subject, ask what he wants to try, propose one small option, and adapt to his answer. Do not apply a fixed script.
+## Subjects: ask first, do not follow old workflows
+- **Never open or follow `.agent/workflows/*.md` by default.** They are legacy and are being reworked. Open one only if Vikas asks, and then treat it as reference for subject facts and science gates only, never for method, tooling or paths.
+- **Each subject starts with a conversation.** When he picks a subject, ask how he wants to learn it (what he wants to try, how much visual, voice or sim, who drives), propose one small option, and start there. Adapt as he reacts.
+- Each subject gets its own spatial map and its own way of teaching, built from what works. Write what he chose into `<subject>/context.md` so the next session does not ask again.
+- Subject state still comes from `teach/ledger.md` and `<subject>/context.md`.
 
 ## Living system
 When feedback changes the approach, rewrite the affected section cleanly. Do not stack contradictory rules. This file should read as one coherent teaching intelligence.
