@@ -1,8 +1,0 @@
-﻿---
-description: Performs a final quality pass fixing alignment, spacing, consistency, and micro-detail issues before shipping. Use when the user mentions polish, finishing touches, pre-launch review, something looks off, or wants to go from good to great.
----
-Load the `impeccable` skill from .kilo/skills/impeccable/SKILL.md and execute the **polish** playbook (see .kilo/skills/impeccable/reference/polish.md if present).
-
-Arguments: $ARGUMENTS
-
-Run Setup from the skill first, then follow the polish reference end-to-end.
