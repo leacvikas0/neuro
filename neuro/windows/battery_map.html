@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The neuron battery: rough map</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; background: #f7f6f2; overflow: hidden; }
+  svg { width: 100vw; height: 100vh; font-family: 'Caveat', cursive; }
+  .s { opacity: 0; animation: in .6s ease forwards; }
+  @keyframes in { to { opacity: 1; } }
+  .na { fill: #f08a3c; }
+  .k  { fill: #8a55c4; }
+  .ink { fill: #2b2b2b; }
+  .t  { font-size: 30px; font-weight: 700; fill: #2b2b2b; }
+  .b  { font-size: 24px; fill: #2b2b2b; }
+  .g  { font-size: 24px; fill: #8a8a8a; }
+</style>
+</head>
+<body>
+<!--
+ZONE PLAN (viewBox 1200x720, safe x 40-1160, y 40-690). Caveat width ~ chars x size x 0.4
+headline : x 60-531,  y 38-87   (31ch x 38 = 471)
+legend   : x 711-1010, y 52-83
+panel 1  : rect x 50-590,  y 110-335 | cell c(175,220) r85, dots x 61-284 | text x 300-580 (<=29ch @24 = 278)
+panel 2  : rect x 610-1150, y 110-335 | cell c(735,220) r85, pump 810-830, arrows to 850 | text x 860-1140
+panel 3  : rect x 50-590,  y 350-575 | cell c(175,460) r85, +/- ring r70/r100 (x 75-275, y 360-560) | text x 300-580
+panel 4  : rect x 610-1150, y 350-575 | cell c(735,460) r85 | text x 860-1140
+text rows: title +40, lines +80/+115/+150/+185 from panel top (35px spacing >= 1.3 x 24)
+question : x 60-854, y 593-678 (62ch x 32 x 0.4 = 794; baselines 625, 668)
+-->
+<svg viewBox="0 0 1200 720" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="ao" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f08a3c"/></marker>
+    <marker id="ak" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8a55c4"/></marker>
+  </defs>
+
+  <!-- headline + legend -->
+  <text x="60" y="76" font-size="38" font-weight="700" class="ink s">The neuron's battery: rough map</text>
+  <g class="s" style="animation-delay:.3s">
+    <circle cx="720" cy="68" r="9" class="na"/><text x="736" y="76" class="b">Na+ sodium</text>
+    <circle cx="880" cy="68" r="9" class="k"/><text x="896" y="76" class="b">K+ potassium</text>
+  </g>
+
+  <!-- ============ PANEL 1 : the bag ============ -->
+  <g class="s" style="animation-delay:.6s">
+    <rect x="50" y="110" width="540" height="225" rx="14" fill="none" stroke="#d6d3cb" stroke-width="2"/>
+    <circle cx="175" cy="220" r="85" fill="#e3eef9" stroke="#e8c45a" stroke-width="10"/>
+    <!-- mixed salt inside -->
+    <circle cx="145" cy="190" r="9" class="na"/><circle cx="200" cy="185" r="9" class="k"/>
+    <circle cx="165" cy="235" r="9" class="k"/><circle cx="210" cy="245" r="9" class="na"/>
+    <circle cx="135" cy="255" r="9" class="na"/><circle cx="190" cy="210" r="9" class="k"/>
+    <!-- mixed salt outside -->
+    <circle cx="70" cy="135" r="9" class="na"/><circle cx="275" cy="135" r="9" class="k"/>
+    <circle cx="70" cy="310" r="9" class="k"/><circle cx="275" cy="310" r="9" class="na"/>
+    <text x="300" y="150" class="t">1 · the bag</text>
+    <text x="300" y="190" class="b">a fat skin wraps salty water</text>
+    <text x="300" y="225" class="b">charged salt can't cross fat</text>
+    <text x="300" y="260" class="b">→ the skin is a dam</text>
+  </g>
+
+  <!-- ============ PANEL 2 : the pump ============ -->
+  <g class="s" style="animation-delay:1.4s">
+    <rect x="610" y="110" width="540" height="225" rx="14" fill="none" stroke="#d6d3cb" stroke-width="2"/>
+    <circle cx="735" cy="220" r="85" fill="#e3eef9" stroke="#e8c45a" stroke-width="10"/>
+    <!-- sorted: K inside, Na outside -->
+    <circle cx="705" cy="185" r="9" class="k"/><circle cx="755" cy="180" r="9" class="k"/>
+    <circle cx="720" cy="230" r="9" class="k"/><circle cx="765" cy="250" r="9" class="k"/>
+    <circle cx="700" cy="262" r="9" class="k"/><circle cx="760" cy="215" r="9" class="na"/>
+    <circle cx="630" cy="135" r="9" class="na"/><circle cx="835" cy="135" r="9" class="na"/>
+    <circle cx="630" cy="310" r="9" class="na"/><circle cx="835" cy="310" r="9" class="na"/>
+    <circle cx="632" cy="222" r="9" class="na"/>
+    <!-- the pump in the wall -->
+    <rect x="808" y="203" width="24" height="34" rx="6" fill="#3b3b3b"/>
+    <line x1="788" y1="212" x2="848" y2="212" stroke="#f08a3c" stroke-width="3" marker-end="url(#ao)"/>
+    <line x1="848" y1="230" x2="790" y2="230" stroke="#8a55c4" stroke-width="3" marker-end="url(#ak)"/>
+    <text x="860" y="150" class="t">2 · the pump</text>
+    <text x="860" y="190" class="b">a protein in the skin burns</text>
+    <text x="860" y="225" class="b">fuel (ATP) to shove salt:</text>
+    <text x="860" y="260" class="b">3 sodium OUT, 2 potassium IN</text>
+    <text x="860" y="295" class="g">→ it charges the battery</text>
+  </g>
+
+  <!-- ============ PANEL 3 : the leak ============ -->
+  <g class="s" style="animation-delay:2.2s">
+    <rect x="50" y="350" width="540" height="225" rx="14" fill="none" stroke="#d6d3cb" stroke-width="2"/>
+    <circle cx="175" cy="460" r="85" fill="#e3eef9" stroke="#e8c45a" stroke-width="10"/>
+    <!-- K door at top -->
+    <rect x="168" y="367" width="14" height="22" rx="3" fill="#8a55c4"/>
+    <circle cx="175" cy="352" r="0"/>
+    <line x1="196" y1="420" x2="196" y2="372" stroke="#8a55c4" stroke-width="2.5" stroke-dasharray="4 4" marker-end="url(#ak)"/>
+    <!-- K inside -->
+    <circle cx="150" cy="430" r="9" class="k"/><circle cx="195" cy="440" r="9" class="k"/>
+    <circle cx="160" cy="480" r="9" class="k"/><circle cx="205" cy="490" r="9" class="k"/>
+    <!-- minus ring inside, plus ring outside -->
+    <g font-size="24" font-weight="700">
+      <text x="110" y="468" fill="#2f6db5">−</text><text x="230" y="468" fill="#2f6db5">−</text>
+      <text x="170" y="530" fill="#2f6db5">−</text>
+      <text x="62" y="468" fill="#d23a3a">+</text><text x="272" y="468" fill="#d23a3a">+</text>
+      <text x="167" y="570" fill="#d23a3a">+</text>
+    </g>
+    <text x="300" y="390" class="t">3 · the leak</text>
+    <text x="300" y="430" class="b">a few doors fit only K+</text>
+    <text x="300" y="465" class="b">K+ trickles out of the bag</text>
+    <text x="300" y="500" class="b">inside settles at −70 mV</text>
+    <text x="300" y="535" class="g">(− inside, + outside)</text>
+  </g>
+
+  <!-- ============ PANEL 4 : the spark ============ -->
+  <g class="s" style="animation-delay:3.0s">
+    <rect x="610" y="350" width="540" height="225" rx="14" fill="none" stroke="#d6d3cb" stroke-width="2"/>
+    <circle cx="735" cy="460" r="85" fill="#fdeedd" stroke="#e8c45a" stroke-width="10"/>
+    <!-- Na door on left, flood in -->
+    <rect x="642" y="453" width="22" height="14" rx="3" fill="#f08a3c"/>
+    <circle cx="628" cy="420" r="9" class="na"/><circle cx="628" cy="500" r="9" class="na"/>
+    <line x1="625" y1="460" x2="705" y2="460" stroke="#f08a3c" stroke-width="3" marker-end="url(#ao)"/>
+    <circle cx="720" cy="430" r="9" class="na"/><circle cx="760" cy="490" r="9" class="na"/>
+    <text x="728" y="472" font-size="30" font-weight="700" fill="#d23a3a">+</text>
+    <text x="860" y="390" class="t">4 · the spark</text>
+    <text x="860" y="430" class="b">a signal opens sodium doors</text>
+    <text x="860" y="465" class="b">Na+ floods IN for ~1 ms</text>
+    <text x="860" y="500" class="b">inside flips to about +30 mV</text>
+    <text x="860" y="535" class="g">→ that flip is the spike</text>
+  </g>
+
+  <!-- ============ QUESTION ============ -->
+  <g class="s" style="animation-delay:4.0s">
+    <text x="60" y="625" font-size="32" font-weight="700" fill="#d23a3a">K+ is positive and it's leaving. So why does it STOP at −70 mV</text>
+    <text x="60" y="668" font-size="32" font-weight="700" fill="#d23a3a">instead of draining the whole bag? What's pulling it back?</text>
+  </g>
+</svg>
+</body>
+</html>

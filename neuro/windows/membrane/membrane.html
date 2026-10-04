@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The membrane: why ions can't just walk in</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; background: #f7f6f2; overflow: hidden; }
+  svg { width: 100vw; height: 100vh; font-family: 'Caveat', cursive; display: block; }
+
+  /* ions drift like they're being jostled by water */
+  .jig { animation: jig 3.6s ease-in-out infinite alternate; }
+  @keyframes jig {
+    0%   { transform: translate(0, 0); }
+    35%  { transform: translate(var(--dx), var(--dy)); }
+    70%  { transform: translate(calc(var(--dx) * -0.7), calc(var(--dy) * 0.6)); }
+    100% { transform: translate(calc(var(--dy) * 0.6), calc(var(--dx) * -0.8)); }
+  }
+  .body { transition: fill .6s; }
+
+  /* talking: bob + mouth flaps */
+  .talk .mouth-open { display: none; transform-box: fill-box; transform-origin: center; }
+  .talk.speaking { animation: bob .3s ease-in-out infinite alternate; }
+  .talk.speaking .mouth-open { display: inline; animation: yap .16s ease-in-out infinite alternate; }
+  .talk.speaking .mouth-rest { display: none; }
+  @keyframes bob { from { transform: translateY(0); } to { transform: translateY(-3px); } }
+  @keyframes yap { from { transform: scaleY(.35); } to { transform: scaleY(1.25); } }
+
+  .dizzy { animation: dizzy .9s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+  @keyframes dizzy { from { transform: rotate(-9deg); } to { transform: rotate(9deg); } }
+  .stars { animation: orbit 1.6s linear infinite; transform-box: fill-box; transform-origin: center; }
+  @keyframes orbit { to { transform: rotate(360deg); } }
+
+  .bubble { animation: pop .22s ease-out; transform-box: fill-box; transform-origin: 50% 100%; }
+  .bubble.out { opacity: 0; transition: opacity .3s; }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .shake { animation: shake .34s linear; }
+  @keyframes shake { 0%,100% { transform: translate(0,0); } 20% { transform: translate(-5px, 2px); } 40% { transform: translate(4px,-2px); } 60% { transform: translate(-3px, 1px); } 80% { transform: translate(2px, 0); } }
+  .pulse { animation: pulse .6s ease-in-out; transform-origin: 380px 345px; }
+  @keyframes pulse { 50% { transform: scale(1.045); } }
+  .blink { animation: blink 1.1s ease-in-out infinite alternate; }
+  @keyframes blink { from { opacity: .35; } to { opacity: 1; } }
+</style>
+</head>
+<body>
+<!--
+ZONE PLAN (viewBox 1200x720, safe area x 40-1160, y 40-690). Caveat width ~ chars x size x 0.4
+title      : x 60-588,    y 60-100   (30 ch x 44 x 0.4 = 528)
+pool       : x 60-700,    y 125-560  superellipse tank; every ion (r19) lives inside it
+skin       : ellipse c(380,345) rx160 ry105, outlines +-10 -> x 210-550, y 230-460
+  inside   : label (380,286); ions >= 30px inside the ring | outside label: see below
+  fat label: x 300-492, y 503-525, arrow up to the ring bottom (y 466)
+wall face  : (230,309) on the ring, 54 wide
+question   : x 60-678, y 593-676 (2 lines of 46 ch x 32 x 0.4 = 590), 33px below pool
+notes col  : x 740-1160
+  verse 1   : y 84-262   (salt + water / magnets / rip apart / IONS)
+  verse 2   : y 280-452  (legend dots, +1 note, grey note)
+  verse 4   : y 478-683  (coat inset: centre (830,598), radius 62; fat slab x 975-1150 y 555-605; 2 text lines)
+hud        : x 740-1160, y 40-56
+outside lbl: (112,205), clear of ions at (110,255) and (250,170)
+gaps between blocks >= 20px
+-->
+<svg id="board" viewBox="0 0 1200 720" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1.4" fill="#e6e3da"/></pattern>
+  </defs>
+  <defs id="clips"></defs>
+  <rect width="1200" height="720" fill="#f7f6f2"/>
+  <rect width="1200" height="720" fill="url(#dots)"/>
+  <g id="world"></g>
+  <g id="speech"></g>
+  <g id="pen" style="display:none"><path d="M0,0 L10,-22" stroke="#2b2b2b" stroke-width="7" stroke-linecap="round"/><circle r="2.6" fill="#2b2b2b"/></g>
+  <g id="hud">
+    <g id="hud-dots"></g>
+    <text id="hud-text" x="1160" y="54" font-size="18" fill="#8a8a8a" text-anchor="end"></text>
+  </g>
+  <g id="intro">
+    <text x="600" y="350" font-size="76" font-weight="700" fill="#2b2b2b" text-anchor="middle" class="blink">press space</text>
+    <text x="600" y="404" font-size="28" fill="#8a8a8a" text-anchor="middle">sound on · five short verses · headphones help</text>
+  </g>
+</svg>
+<script src="audio/timing.js"></script>
+<script src="../../../.kilo/skills/whiteboard/engine.js"></script>
+<script src="membrane.js"></script>
+</body>
+</html>
+

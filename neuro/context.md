@@ -50,3 +50,9 @@
 
 ## Parked Topics
 - His IQ/abstraction theory (parked since session 1)
+
+## Membrane battery lesson (Oct 03)
+- **Status:** Built `neuro/windows/membrane/` as a voiced, beat-by-beat board: Nate (Na+), Kay (K+), the Wall (fat skin) and a narrator, all Eleven v4. Flux/Deepgram audio retired.
+- **Progress:** Verses 1-5 delivered: ions in salty water, Na+/K+ both +1, fat skin makes inside/outside, Nate bounces off (water-coat reason), then the puzzle. Pump and K leak not revealed.
+- **Open loops:** Vikas has not yet answered the beat 5 question (how can inside differ from outside if the skin blocks every ion?). Audio has not been listened to by ear; he reports voice or timing defects.
+- **Next:** Wait for his answer, then build on it. Preserve: the pump sorts salt, the K leak creates the voltage, the pump does not directly create -70 mV.

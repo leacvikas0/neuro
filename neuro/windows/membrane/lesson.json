@@ -1,0 +1,62 @@
+{
+  "cast": {
+    "narrator": { "name": "Lab partner", "voice": "George", "note": "warm British storyteller" },
+    "nate":     { "name": "Nate (Na+)",  "voice": "Charlie", "note": "brash Australian" },
+    "kay":      { "name": "Kay (K+)",    "voice": "Laura", "note": "sassy, quirky" },
+    "wall":     { "name": "The Wall",    "voice": "Adam", "note": "deep, firm; Scottish bouncer via tag" }
+  },
+  "settings": { "stability": 0.3 },
+  "verses": [
+    {
+      "id": "b1_drop",
+      "turns": [
+        { "who": "narrator", "text": "[hushed, conspiratorial] Okay... take a breath. We're shrinking. [soft whoosh] Down, and down... into one single drop of salty water." },
+        { "who": "narrator", "text": "[curious] Salt doesn't just sit in water. Water molecules are tiny magnets. They grab the salt, and rip it apart into charged pieces. [pause] Those pieces... are called ions." },
+        { "who": "nate", "text": "[muffled, underwater voice, groggy] Mmf... who turned the lights on?", "bubble": "mmf... who turned the lights on?" }
+      ]
+    },
+    {
+      "id": "b2_meet",
+      "turns": [
+        { "who": "narrator", "text": "[warm, amused] Two kinds of ions run this show. Meet them." },
+        { "who": "nate", "text": "[cocky, fast-talking, grinning] Sodium! N-A! The orange one. Plus one charge, plenty of attitude.", "bubble": "Sodium! Na! Plus one charge, plenty of attitude." },
+        { "who": "kay", "text": "[lazy, smug drawl] Potassium. K. Purple. [yawns] Also plus one. We're basically twins. Except he's louder.", "bubble": "Potassium. K. Also plus one. We're basically twins. Except he's louder." },
+        { "who": "nate", "text": "[offended] Hey!", "bubble": "Hey!" },
+        { "who": "narrator", "text": "[curious] Plus one just means each one is missing one electron. Same charge, different atoms. [pause] There are negative ions in there too... but they've got the night off." }
+      ]
+    },
+    {
+      "id": "b3_skin",
+      "turns": [
+        { "who": "narrator", "text": "[softly] Now let's build something. A thin skin... wrapped around a bunch of these ions." },
+        { "who": "narrator", "text": "[amused] And just like that, the world has two places. An inside... [pause] and an outside." },
+        { "who": "kay", "text": "[relieved sigh, smug] Ahh. Quiet in here.", "bubble": "Ahh. Quiet in here." },
+        { "who": "nate", "text": "[muffled, far away, shouting] Hey! Where'd everybody go?!", "bubble": "Hey! Where'd everybody go?!" },
+        { "who": "narrator", "text": "[matter-of-fact] The skin is made of fat. Remember that. It matters a lot more than it looks." },
+        { "who": "wall", "text": "[strong Scottish accent, gravelly voice, slow, deadpan] Fat. Not water. Charged guests... [dry chuckle] not on the list.", "bubble": "Fat. Not water. Charged guests... not on the list." }
+      ]
+    },
+    {
+      "id": "b4_bounce",
+      "turns": [
+        { "who": "narrator", "text": "[building tension] Now watch this sodium ion, right here." },
+        { "who": "nate", "text": "[cocky] Easy. Watch this. [grunting, taking a run-up] Hyaaah!", "bubble": "Easy. Watch this. Hyaaah!" },
+        { "who": "nate", "text": "[dull thud] [winded, groaning, nasal] Oofff... ow. My everything.", "bubble": "Oof! Ow. My everything." },
+        { "who": "wall", "text": "[strong Scottish accent, gravelly, deadpan] Told ye.", "bubble": "Told ye." },
+        { "who": "kay", "text": "[snorts, laughing] Smooth, Nate. Real smooth.", "bubble": "Smooth, Nate. Real smooth." },
+        { "who": "nate", "text": "[hoarse, scratchy voice, like a sore throat, wheezing] ...I'm fine.", "bubble": "...I'm fine." },
+        { "who": "narrator", "text": "[curious, leaning in] Here's the why. An ion never swims alone. It wears a coat of water molecules, clinging to its charge. To get into fat, it would have to take that coat off. And fat has nothing to give it back." },
+        { "who": "narrator", "text": "[quietly] Charged things and fat... a bit like oil and water. So for an ion, this skin is a wall." }
+      ]
+    },
+    {
+      "id": "b5_puzzle",
+      "turns": [
+        { "who": "narrator", "text": "[low, steady voice, restrained urgency] So... here's the puzzle." },
+        { "who": "narrator", "text": "[slowly, deliberate] If this skin blocks every ion... [pause] how could the inside ever end up different from the outside?" },
+        { "who": "kay", "text": "[whispers, intrigued] ...Huh.", "bubble": "...huh." },
+        { "who": "nate", "text": "[whispers] Don't look at me.", "bubble": "Don't look at me." }
+      ]
+    }
+  ]
+}
