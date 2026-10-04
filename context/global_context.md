@@ -10,7 +10,7 @@
 
 ## Subject Status
 - **Math:** Built spatial intuitions for Determinants, Basis Vectors, compounding rotations (Epicycles), and LCM natively on a number line without equations.
-- **AI:** Reached the "Global Coherence" bottleneck for image generation. Derived that 27 pixel inputs entering a single neuron produce exactly 1 mixed number. The current parked question is what physical object is needed to produce a second mixed number (Output 2). We also permanently integrated the `whiteboard-teaching` HTML/SVG visual style for spatial bottlenecks.
+- **AI:** Reached the "Global Coherence" bottleneck for image generation. Derived that 27 pixel inputs entering a single neuron produce exactly 1 mixed number. The current parked question is what physical object is needed to produce a second mixed number (Output 2). We also permanently integrated the `whiteboard` HTML/SVG visual style for spatial bottlenecks.
 - **Neuroscience:** Shifted to curiosity-driven investigation of mysteries. Bypassed textbook menus. Derived whole-brain macro-architecture from transection/lesion data. 
 - **Physics/Chemistry:** Reopened fluid dynamics (flight). Vikas derived momentum-transfer lift; parked on a physical sink experiment to discover top-surface lift.
 - **Neuro battery (Oct 03):** Voiced character board `neuro/windows/membrane/` (ElevenLabs v4, engine in `.kilo/skills/whiteboard/`) is parked on the question of how inside differs from outside if the fat skin blocks every ion.

@@ -27,5 +27,13 @@ Explain by drawing and performing, not by writing paragraphs. Notes, questions a
 
 Pick the smallest thing that works. Words in this system: a **Tale** is a lesson, a **Verse** is one step of it (one drawn element plus its spoken lines), a **Saga** is a series of Tales.
 
+## Delegation (keep your own context free)
+You are the teacher and planner. Decide the plan yourself (target, cast, cause -> effect per verse, script, tags, which part goes to whom), then delegate the heavy code and run children in parallel.
+- **Visual work goes to Sonnet subagents** (drawing, scene code, characters, anything on the board). Pass `model` explicitly; do not use a cheaper model for visuals.
+- **Audio stays with you**: write the script and tags, run `tts_elevenlabs.py`. It is one command; no subagent. (A GPT-6 Luna test child confirmed it cannot hear audio, so it adds nothing there.)
+- **Parallel children get disjoint files** (for example one file per verse), so they never edit the same file.
+- **Prompts are self-contained**: plan, the guide paths to read, cue times from `audio/timing.js`, the exact files they own, and "be efficient". Children cannot ask questions.
+- **Reports are 10 lines or fewer.** Review reports, not whole files. Do not delegate edits smaller than the prompt needed to describe them.
+
 ## Everything else is advice
 Cast size, drawing style, layout and reusable pieces are suggestions from past Tales. Override them when you have a better idea. Fresh drawings are welcome; if one is clearly better than what exists, keep it for the next Tale.

@@ -1,33 +1,34 @@
 # AI Context — Vikas's AI Journey
 
 ## Current Status
-- Restarted AI learning. Zeroing out old knowledge.
-- Goal: Deep, bottom-up understanding of Diffusion and Transformers, including math and Python.
-- Approach: Predictive processing analogy. Build broken machines, hit walls, fix them. Geometry before math. Python learned on the fly.
+- Transitioning from single-neuron numerical tests to spatial architectures for image processing.
+- Explored the abstract boundary between the world and the machine (Encoder -> Machine -> Decoder).
+- Hit the physical bottleneck of "global coherence" — scaling the machine to output multiple numbers.
+- Developed the `whiteboard` skill: all future architectural bottlenecks will use spatial, minimal HTML/SVG diagrams with native marker notes instead of text walls.
 
 ## Progress
-1. **The Simplest Machine**
-   - Introduced a one-input, one-weight (dial) machine.
-   - User correctly identified that the operation depends on the transformation and guessed multiplication (2 x 3 = 6).
-   - User ran Python REPL, debugged assignment syntax (= vs expression), and successfully calculated loss = realoutput - output resulting in 4.0.
-   - User derived the exact intuition for gradient descent unprompted: instead of computing y = realoutput/x, the machine must nudge the dial (y goes 2.9 loss increases, goes 3.1 it decreases), measure the distance, and follow the slope down to zero loss.
-   - Hit a wall: Why do we guess/nudge instead of just solving it directly algebraically (w = truth / x)?
-   - User realized that loss contains both magnitude (distance) AND direction (sign: + or -), removing the need to guess randomly.
-   - Core Click: User fully grasped *why* AI exists as a field. You can't algebraically solve a billion parameters simultaneously, so you write an algorithm (gradient descent) to iteratively nudge them based on the loss compass.
-   - **The Reversed Gear (Negative Input):** Explored what happens when input is negative. The naive 
-ew_dial = dial + error broke and ran backwards.
-   - **The Nudge (Multiplication):** User discovered that input * loss perfectly flips the direction when the gear is reversed, creating the steering wheel.
-   - **The Brakes (Learning Rate):** User noticed the machine overshoots if the nudge is too large, and deduced the need for a speed limit (learning rate lpha).
-   - **Diminishing Returns:** User independently deduced the concept of model checkpointing and diminishing returns as the machine slows down approaching zero loss.
-   - **First Python Engine:** User successfully wrote their first while loop in 	rain.py, overcoming indentation syntax, and trained their one-dial machine to reach 39.953 (target 40). It learned.
+1. **The Simplest Machine (1 Dial)**
+   - Derived the full gradient descent loop from scratch: loss compass, `nudge = input * loss * lr`, learning rate speed limit, stopping condition.
+   - Built and ran first Python training engine in `ai/train.py`.
+
+2. **Two Inputs & Multi-Dial Credit Assignment**
+   - Built a 2-input, 2-dial machine: `output = (x1 * w1) + (x2 * w2)`.
+   - Solved the credit assignment puzzle: each dial scales its local nudge proportionally to its connected input lever.
+   - Wrote, debugged, and verified the multi-dial training loop in `ai/train_scale.py`.
+
+3. **Multi-Sample Dataset Training (Stochastic Gradient Descent)**
+   - Resolved catastrophic forgetting by training on multiple samples via zipped epochs.
+   - Built multi-sample dataset training in `ai/weird-exp.py`.
+
+4. **The Global Coherence Wall (Current)**
+   - Derived that a 3x3 pixel image requires 27 input levers.
+   - Discovered the physical bottleneck: a single neuron mixes all 27 inputs into exactly ONE scalar number (`Output 1`).
+   - Proved that intercepting the inputs *before* the sum destroys the ability for pixels to mix (global coherence).
 
 ## Open Loops
-- **Multiple Inputs (Solved):** Explored credit assignment across 2 inputs. Discovered that while both dials share the same single loss, each dial's nudge must scale with its own connected input lever (`nudge_i = x_i * loss * learning_rate`).
-- **Scaling to N inputs:** How this mechanism applies to 1,000s of inputs simultaneously, and what happens when training across multiple different examples/data points (the dataset problem).
+- **The Handoff Question:** If the first neuron crushes 27 inputs into a single mixed number (Output 1), what exact physical object must be placed in the "mystery circle" to produce a second mixed number (Output 2)?
+- What happens when a baseline shift exists -> discovering the Bias dial `b`.
 
 ## Next
-- Explore multi-sample training (datasets) and batching/generalization across varying input baskets.
-
-## Session Notes (2026-08-20, end of day)
-- User requested a full honest audit of "did I derive this myself?" across all past ML sessions. Verdict delivered with transcript evidence: insights were his (loop algorithm, why-not-divide wall, loss compass, generalization, learning rate, checkpoints/diminishing returns, stopping condition); the maze, two traps (negative-input gear, overshoot), names, analogies, and Python tools were the teacher's. Most scaffolded piece: `input × loss` as the direction cheat code. Settled framing: co-discovery — his reasoning, guided route. User's takeaway: the real artifact is the reusable structure (hit wall ? measure gap ? hypothesize ? test ? update), not gradient descent itself.
-- Visual prefs reaffirmed: static pastel-box state images (ai/images/) over text grids; knobs/machine drawings over tables. Always serve via localhost link.
+- Answer the handoff question to derive the concept of a multi-neuron **Layer**.
+- Explore fixed baseline offset (`+ b`).
