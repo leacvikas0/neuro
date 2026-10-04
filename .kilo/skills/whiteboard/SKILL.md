@@ -1,39 +1,42 @@
 ---
 name: whiteboard
-description: Use when Vikas needs a spatial, visual, or story-driven explanation of a mechanism (math, ML, chemistry, biology, neuro). Builds a hand-drawn SVG board, either a quick static board or a voiced Tale with characters (ElevenLabs Eleven v4). Read this first, then only the guide for the path you pick.
+description: Use when Vikas needs a visual or story-driven explanation of a mechanism (math, ML, chemistry, biology, neuro). Builds an interactive sim, a hand-drawn SVG board, or a voiced Tale with characters (ElevenLabs Eleven v4). Read this first, then only the guide for the path you pick.
 ---
 
-# Whiteboard
+# Visuals and voice
 
-Explain by drawing and performing, not by writing paragraphs. Notes, questions and speech live inside the SVG (Caveat handwriting, background `#f7f6f2`), never in HTML text panels.
+The teaching rules live in `teach/TEACHER.md`; this skill is the build side. Notes, questions and speech live inside the picture (Caveat handwriting, background `#f7f6f2` for boards), never in HTML text panels.
 
 ## Always
-1. **Audio is ElevenLabs Eleven v4. Never v3.** (`tts_elevenlabs.py` pins it; the API defaults to v3 if `model_id` is omitted.)
-2. **Voiced lessons are performed, not read.** A cast of distinct voices, expressive tags on every line. No flat narrator.
-3. **One layer at a time, drawn on the same image.** Never replace the board.
+1. **Audio is ElevenLabs Eleven v4. Never v3.** `tts_elevenlabs.py` pins it; the API defaults to v3 if `model_id` is omitted.
+2. **Voiced lessons are performed, not read.** Distinct voices, expressive tags on every line, humour welcome. No flat narrator.
+3. **One layer at a time, on the same picture.** Never replace the board or sim.
 4. **End on a red question and stop.** Do not reveal what it asks him to derive.
-5. **Respect the science gates** in the subject context (what must not be introduced yet).
-6. **Replay-safe actions.** Space/Backspace/R rebuild earlier verses instantly, so every action must work when run instantly.
-7. **Fit desktop and tablet (iPad).** Fixed `viewBox="0 0 1200 720"` scaled to the viewport, readable text. Nothing more.
-8. **Trust your work.** Write it once, carefully. Vikas reports defects; fix exactly those. No proactive test rigs.
+5. **Respect the science gates** in the subject context.
+6. **Replay-safe actions** (boards): Space/Backspace/R rebuild earlier verses instantly, so every action must work when run instantly.
+7. **Fit desktop and tablet (iPad).** Readable text, touch-friendly controls.
+8. **Plan before code.** Approved plan first (see `guides/tale.md`), then build once, carefully. Vikas reports defects; fix exactly those.
+9. **Serve with `python teach/serve.py`.** It prints the URL for local or cloud. Never hardcode a port.
 
 ## Pick a path
 | Need | Make | Read |
 |---|---|---|
+| Moving parts, dials, he predicts then tests | Interactive sim (default) | `guides/sim.md` |
 | Quick picture of one idea | Static board | `guides/static-board.md` |
-| A new mechanism, story, characters | Tale (voiced, verse by verse) | `guides/tale.md` |
-| Anything voiced | + ElevenLabs rules | `guides/elevenlabs.md` |
-| Writing scene code | + engine API | `guides/engine.md` |
+| Mechanism as a story with characters | Tale (voiced, verse by verse) | `guides/tale.md` |
+| Anything voiced | + voice rules | `guides/elevenlabs.md` |
+| Board scene code | + engine API | `guides/engine.md` |
 
-Pick the smallest thing that works. Words in this system: a **Tale** is a lesson, a **Verse** is one step of it (one drawn element plus its spoken lines), a **Saga** is a series of Tales.
+A **Tale** is a lesson, a **Verse** is one step (one drawn element plus its spoken lines), a **Saga** is a series. Sims and Tales combine: a Tale verse can embed a sim he operates.
 
-## Delegation (keep your own context free)
-You are the teacher and planner. Decide the plan yourself (target, cast, cause -> effect per verse, script, tags, which part goes to whom), then delegate the heavy code and run children in parallel.
-- **Visual work goes to Sonnet subagents** (drawing, scene code, characters, anything on the board). Pass `model` explicitly; do not use a cheaper model for visuals.
-- **Audio stays with you**: write the script and tags, run `tts_elevenlabs.py`. It is one command; no subagent. (A GPT-6 Luna test child confirmed it cannot hear audio, so it adds nothing there.)
-- **Parallel children get disjoint files** (for example one file per verse), so they never edit the same file.
-- **Prompts are self-contained**: plan, the guide paths to read, cue times from `audio/timing.js`, the exact files they own, and "be efficient". Children cannot ask questions.
-- **Reports are 10 lines or fewer.** Review reports, not whole files. Do not delegate edits smaller than the prompt needed to describe them.
+## Delegation (tokens go to code, spend them carefully)
+You are the teacher and planner. Decide target, cast, cause to effect per verse, script and tags yourself. Delegate the heavy code, in parallel.
+- **Visual and scene code goes to the strongest coding model available.** Pass the model explicitly if the environment supports it.
+- **Audio stays with you**: write the script, run `tts_elevenlabs.py` (one command). Models cannot hear audio.
+- **Parallel children get disjoint files** (for example one file per verse).
+- **Prompts are self-contained**: plan, guide paths, cue words from `audio/timing.js`, owned files, "be efficient". Children cannot ask questions.
+- **Reports are 10 lines or fewer**, a useful summary for the teacher. Review reports, not whole files.
+- Do not delegate an edit smaller than its prompt.
 
 ## Everything else is advice
-Cast size, drawing style, layout and reusable pieces are suggestions from past Tales. Override them when you have a better idea. Fresh drawings are welcome; if one is clearly better than what exists, keep it for the next Tale.
+Cast size, style, layout and old pieces are suggestions from past Tales. There is no reuse mandate: build fresh when it is better, and keep a drawing for later only when it is clearly better than what exists. Fixed: element colours and charges, replay-safety.

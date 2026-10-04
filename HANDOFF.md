@@ -1,12 +1,12 @@
 # Handoff (Oct 04) — whiteboard Tales, ElevenLabs v4
 
-Learner: Vikas. Spatial, bottom-up, researcher-to-researcher. Read `.kilo/agent/teach.md` and `.kilo/skills/whiteboard/SKILL.md` first.
+Learner: Vikas. Spatial, bottom-up, researcher-to-researcher. Read `teach/TEACHER.md`, `teach/ledger.md` and `.kilo/skills/whiteboard/SKILL.md` first.
 Old handoff (Flux era): `archive/HANDOFF-2026-10-03-flux-era.md`.
 
 ## State
 - Branch `hoplite/lindos-05784135`, code last pushed at `9782995`.
 - Shipped: membrane Tale `neuro/windows/membrane/` (4 voiced characters, 5 verses, Eleven v4) and the `whiteboard` skill (router + 4 guides) with `engine.js` and `tts_elevenlabs.py`.
-- Serve: `python -m http.server 8765` from repo root (start by hand each session). URL: `http://localhost:8765/neuro/windows/membrane/membrane.html`.
+- Serve: `python teach/serve.py` (prints the URL; cloud: open that port). Membrane page: `/neuro/windows/membrane/membrane.html`.
 - Audio has never been listened to by ear. Vikas has not answered verse 5 (how can inside differ from outside if the skin blocks every ion?). Do not reveal pump or K leak until he does.
 
 ## Known defects in the shipped Tale (left on purpose; do not chase)
@@ -30,3 +30,8 @@ Old handoff (Flux era): `archive/HANDOFF-2026-10-03-flux-era.md`.
 ## Warnings
 - ElevenLabs free tier: about 6,900 of 10,000 characters left this month; no commercial use.
 - `.env` is tracked in git with live keys (accepted by Vikas, private repo).
+
+## Rework (Oct 04, cloud thread)
+- New core: `teach/TEACHER.md` (one file, learner included, he drives, plan before code), `teach/ledger.md`, `teach/serve.py`; `.kilo/agent/teach.md`, `CLAUDE.md`, `AGENTS.md` are thin pointers.
+- Groq ASR dropped: `tts_elevenlabs.py` now writes word timings (`words` in `timing.js`), engine has `ctx.W(turn, word)`. Unverified against the live API (no key in the cloud sandbox); check on the next real render.
+- Whiteboard skill now leads with interactive sims; voice is unrationed; no reuse mandate.

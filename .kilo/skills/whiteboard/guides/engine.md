@@ -6,7 +6,7 @@ Load with a plain script tag (works from `file://`). Needs `<g id="pen">`, `<def
 - `WB.arrow(layer, pts, opts)` stroke plus arrowhead
 - `WB.write(layer, x, y, text, {size, fill, weight, anchor, ms})` left-to-right reveal with the pen
 - `WB.tween(ms, update, ease)`, `WB.ease.{linear,inOut,outBack}`, `WB.el`, `WB.rng`, `WB.catmull`, `WB.jitter`
-- `WB.controller({verses, audioDir, reset, speak, hud, onStart})` handles Space (advance or finish), Backspace (back one verse), R (replay), audio, cue scheduling. Each verse: `{ id, build(ctx) }`, `id` = the mp3 name.
+- `WB.controller({verses, audioDir, reset, speak, hud, onStart})` handles Space (advance or finish), Backspace (back one verse), R (replay), audio, cue scheduling. Each verse: `{ id, build(ctx) }`, `id` = the mp3 name. In `build`, `ctx.at(time, fn)` schedules, `ctx.T(turn, off)` is a turn start, `ctx.W(turn, 'word', nth, off)` is the time that word is spoken.
 - Scene supplies `reset()`, `speak(turn, on)` (talking animation, bubble from `turn.bubble`), `hud(status, cur, n)` (last status `end` should tell the user to answer in chat).
 
 ## Replay-safety (the usual bug source)

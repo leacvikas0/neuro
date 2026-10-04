@@ -143,6 +143,11 @@
       const acts = [];
       const ctx = {
         turns: tm.turns,
+        // Time of the nth spoken occurrence of `word` in turn k (falls back to the turn start).
+        W: (k, word, nth = 0, off = 0) => {
+          const w = (tm.words || []).filter((x) => x.turn === k && x.w === String(word).toLowerCase().replace(/[^a-z0-9]/g, ''))[nth];
+          return (w ? w.s : tm.turns[k] && tm.turns[k].start != null ? tm.turns[k].start : 0) + off;
+        },
         at: (t, fn) => acts.push({ t, fn }),
         T: (k, off = 0) => (tm.turns[k] && tm.turns[k].start != null ? tm.turns[k].start : 0) + off,
       };

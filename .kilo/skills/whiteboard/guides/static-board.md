@@ -6,4 +6,4 @@ One SVG, a few layers that fade in, a red question at the end. Style reference: 
 - Notes are marker-style text inside the SVG, conversational and short.
 - Evolve one diagram; do not lay out several panels at once (`neuro/windows/battery_map.html` was disliked for that).
 - Finish with a red question pointing at the exact blockage.
-- Serve from the repo root: `python -m http.server 8765`. Reply with `http://localhost:8765/<subject>/windows/<file>.html`, one line on the question, and stop.
+- Serve with `python teach/serve.py` (prints the URL, local or cloud). Reply with `<url>/<subject>/windows/<file>.html`, one line on the question, and stop.

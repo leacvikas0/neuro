@@ -5,7 +5,7 @@ Usage:  python tts_elevenlabs.py <lesson.json> <out_dir> [--verse ID ...] [--for
 lesson.json: {"cast": {key: {"voice": "<premade voice first name>"}}, "settings": {"stability": ...},
               "verses": [{"id": ..., "turns": [{"who": key, "text": "[tag] line", "bubble": "optional caption"}]}]}
 
-Writes <out_dir>/<verse id>.mp3 and <out_dir>/timing.js (per-turn start/end seconds for syncing drawings).
+Writes <out_dir>/<verse id>.mp3 and <out_dir>/timing.js (per-turn and per-word start/end seconds for syncing drawings).
 Eleven v4 only: the model id is pinned below. The API default is v3, so it is always sent explicitly.
 Existing clips are skipped unless --force or --verse is given; replaced clips are kept in <out_dir>/_takes/.
 """
@@ -58,7 +58,41 @@ def resolve_voice(first_name: str, key: str) -> str:
     sys.exit(f"premade voice '{first_name}' not found")
 
 
-def render_verse(verse: dict, voices: dict, settings: dict, key: str) -> tuple[bytes, list[dict]]:
+def word_timings(res: dict, turns: list[dict]) -> list[dict]:
+    """Words with start/end seconds from the character alignment, tags removed, bucketed into turns by time."""
+    al = res.get("alignment") or res.get("normalized_alignment")
+    if not al:
+        return []
+    words, buf, ws, we, in_tag = [], "", None, None, False
+
+    def flush() -> None:
+        nonlocal buf, ws, we
+        w = "".join(c for c in buf.lower() if c.isalnum())
+        if w and ws is not None:
+            mid = (ws + we) / 2
+            turn = next((i for i, tn in enumerate(turns) if tn["start"] is not None and tn["start"] <= mid < tn["end"]), len(turns) - 1)
+            words.append({"w": w, "s": round(ws, 3), "e": round(we, 3), "turn": turn})
+        buf, ws, we = "", None, None
+
+    for ch, a, b in zip(al["characters"], al["character_start_times_seconds"], al["character_end_times_seconds"]):
+        if ch == "[":
+            flush()
+            in_tag = True
+        elif ch == "]":
+            in_tag = False
+        elif in_tag:
+            continue
+        elif ch.isspace():
+            flush()
+        else:
+            ws = a if ws is None else ws
+            we = b
+            buf += ch
+    flush()
+    return words
+
+
+def render_verse(verse: dict, voices: dict, settings: dict, key: str) -> tuple[bytes, list[dict], list[dict]]:
     inputs = [{"text": t["text"], "voice_id": voices[t["who"]]} for t in verse["turns"]]
     body = {"inputs": inputs, "model_id": MODEL, "settings": settings}
     assert body["model_id"] == "eleven_v4"
@@ -72,7 +106,7 @@ def render_verse(verse: dict, voices: dict, settings: dict, key: str) -> tuple[b
     for i, t in enumerate(verse["turns"]):
         start, end = spans.get(i, [None, None])
         turns.append({"who": t["who"], "start": start, "end": end, "bubble": t.get("bubble")})
-    return base64.b64decode(res["audio_base64"]), turns
+    return base64.b64decode(res["audio_base64"]), turns, word_timings(res, turns)
 
 
 def main() -> None:
@@ -108,9 +142,9 @@ def main() -> None:
         if mp3.exists():
             (out / "_takes").mkdir(exist_ok=True)
             shutil.move(mp3, out / "_takes" / f"{b['id']}.{int(time.time())}.mp3")
-        audio, turns = render_verse(b, voices, lesson.get("settings", {}), key)
+        audio, turns, words = render_verse(b, voices, lesson.get("settings", {}), key)
         mp3.write_bytes(audio)
-        timing[b["id"]] = {"turns": turns, "duration": max(t["end"] or 0 for t in turns)}
+        timing[b["id"]] = {"turns": turns, "words": words, "duration": max(t["end"] or 0 for t in turns)}
         print(f"{b['id']}: {len(audio) // 1024} KB, {timing[b['id']]['duration']:.1f}s")
         timing_path.write_text(json.dumps(timing, indent=1))
         (out / "timing.js").write_text("window.LESSON_TIMING = " + json.dumps(timing) + ";\n")
