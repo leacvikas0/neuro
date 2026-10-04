@@ -5,7 +5,7 @@ description: Use when Vikas needs a visual or story-driven explanation of a mech
 
 # Visuals and voice
 
-The teaching rules live in `teach/TEACHER.md`; this skill is the build side. Notes, questions and speech live inside the picture (Caveat handwriting, background `#f7f6f2` for boards), never in HTML text panels.
+The teaching method lives in `teach.md`; this skill is the build side. Notes, questions and speech live inside the picture (Caveat handwriting, background `#f7f6f2` for boards), never in HTML text panels.
 
 ## Always
 1. **Audio is ElevenLabs Eleven v4. Never v3.** `tts_elevenlabs.py` pins it; the API defaults to v3 if `model_id` is omitted.

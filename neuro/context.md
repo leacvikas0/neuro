@@ -45,7 +45,7 @@
 
 ## Current State (Aug 06)
 - **Paused at:** Entorhinal Cortex Grid Cells mapping *conceptual* and *abstract* spaces.
-- **Action taken:** Vikas was exhausted/sick. Per his request, ran a full `grok-research` deep dive on Constantinescu 2016 (the bird space fMRI study) + newest 2024-2026 findings on cognitive maps and conceptual grids. 
+- **Action taken:** Vikas was exhausted/sick. Per his request, used native web search tools to run a full deep dive on Constantinescu 2016 (the bird space fMRI study) + newest 2024-2026 findings on cognitive maps and conceptual grids. 
 - **Next session:** Open the saved brief (`neuro/research/2026-08-06-grid-cells-conceptual.md`) and use it to build out the mechanical/spatial understanding of how the brain maps abstract concepts.
 
 ## Parked Topics

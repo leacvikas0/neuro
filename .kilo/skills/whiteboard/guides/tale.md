@@ -8,7 +8,7 @@ Reference build: `neuro/windows/membrane/` (`membrane.html`, `membrane.js`, `les
 3. **Script `lesson.json`.** `cast` (name + premade voice first name), `settings.stability` (0.3), `verses[]` each with `id` and `turns[]` (`who`, `text` with tags, optional `bubble` caption shown in the speech bubble). Max 2000 characters per verse.
 4. **Audio.** Follow `guides/elevenlabs.md`. Check credits with `--dry` first.
 5. **Scene `<tale>.js`.** One `build(ctx)` per verse registering `ctx.at(ctx.W(turn, 'word'), fn)` so each element appears on the word that names it (`ctx.T(turn, offset)` for a turn start). Provide `reset`, `speak`, `hud`. See `guides/engine.md`.
-6. **Close.** Update `teach/ledger.md`, `<subject>/context.md` (Status / Progress / Open loops / Next) and one line in `context/global_context.md`. Commit and push.
+6. **Close.** Update the subject's ledger and `<subject>/context.md` (Status / Progress / Open loops / Next) and one line in `context/global_context.md`. Commit and push.
 7. **Reply** with the URL printed by `python teach/serve.py` plus `/<subject>/windows/<tale>/<tale>.html`, the cast, credits left, and that you could not hear the audio. Stop at the question.
 
 ## Lessons from the first Tale

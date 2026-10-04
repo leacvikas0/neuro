@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta data-noreload>
+<title>cache loop</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:#f7f6f2;overflow:hidden;font-family:Caveat,"Segoe Print","Comic Sans MS",cursive;color:#222}
+svg{width:100vw;height:100vh;display:block;user-select:none}
+text{font-family:inherit}
+.btn{cursor:pointer}.btn rect{fill:#fff;stroke:#222;stroke-width:3;transition:.15s}.btn:hover rect{fill:#eee}
+.btn.on rect{fill:#222}.btn.on text{fill:#f7f6f2}
+.slot{fill:#fff;stroke:#222;stroke-width:4;transition:fill .25s}
+.hit{fill:#bfe6c8}.miss{fill:#f6c3bc}
+</style></head><body>
+<svg id="s" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet"></svg>
+<script>
+const NS="http://www.w3.org/2000/svg",svg=document.getElementById("s");
+const L="ABCDEFGH";let N=5,policy="LRU",box,i,res,hits,miss,out,flash,timer=null,t;
+const el=(n,a={},p=svg,tx)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(tx!=null)e.textContent=tx;p.appendChild(e);return e};
+function reset(){box=[null,null,null,null];i=0;res=[];hits=0;miss=0;out=null;flash=-1;t=0;stop();draw()}
+function stop(){if(timer){clearInterval(timer);timer=null}draw()}
+function step(){
+  const k=L[i%N];let idx=box.indexOf(k.charCodeAt(0)>0?box.findIndex(b=>b&&b.k===k):-1);
+  idx=box.findIndex(b=>b&&b.k===k);t++;
+  if(idx>=0){box[idx].last=t;res[i]="h";hits++;out=null;flash=idx}
+  else{let v=box.findIndex(b=>!b);
+    if(v<0){const key=policy==="FIFO"?"born":"last";v=0;box.forEach((b,j)=>{if(b[key]<box[v][key])v=j});out=box[v].k}else out=null;
+    box[v]={k,born:t,last:t};res[i]="m";miss++;flash=v}
+  i++;draw()}
+function btn(x,y,w,label,fn,on){const g=el("g",{class:"btn"+(on?" on":"")});el("rect",{x,y,width:w,height:46,rx:10},g);el("text",{x:x+w/2,y:y+33,"text-anchor":"middle","font-size":28,"font-weight":700},g,label);g.onclick=fn}
+function draw(){
+  svg.innerHTML="";
+  el("text",{x:40,y:62,"font-size":46,"font-weight":700},svg,"a box of 4, and a loop that repeats");
+  // request stream
+  el("text",{x:40,y:118,"font-size":28,fill:"#666"},svg,"requests, in order");
+  const s=Math.max(0,i-4);
+  for(let n=0;n<14;n++){const idx=s+n,x=40+n*66,r=res[idx];
+    el("rect",{x,y:136,width:56,height:56,rx:8,fill:r==="h"?"#bfe6c8":r==="m"?"#f6c3bc":"#fff",stroke:"#222","stroke-width":idx===i?5:2.5,"stroke-dasharray":idx>i?"6 5":"0"});
+    el("text",{x:x+28,y:176,"text-anchor":"middle","font-size":38,"font-weight":700,opacity:idx>i?.45:1},svg,L[idx%N])}
+  el("text",{x:40+(i-s)*66+28,y:224,"text-anchor":"middle","font-size":26,fill:"#222"},svg,"next");
+  // box
+  el("text",{x:40,y:300,"font-size":28,fill:"#666"},svg,"the box (" + policy + ": " + (policy==="FIFO"?"oldest arrival leaves":"longest untouched leaves")+")");
+  for(let n=0;n<4;n++){const x=40+n*130;const c=el("rect",{x,y:318,width:112,height:112,rx:12,class:"slot"+(n===flash?(res[i-1]==="h"?" hit":" miss"):"")});
+    if(box[n])el("text",{x:x+56,y:392,"text-anchor":"middle","font-size":72,"font-weight":700},svg,box[n].k)}
+  // evicted
+  el("text",{x:620,y:300,"font-size":28,fill:"#666"},svg,"just kicked out");
+  el("rect",{x:620,y:318,width:112,height:112,rx:12,fill:"none",stroke:"#aaa","stroke-width":3,"stroke-dasharray":"8 6"});
+  if(out)el("text",{x:676,y:392,"text-anchor":"middle","font-size":72,"font-weight":700,fill:"#c0392b"},svg,out);
+  // counters
+  el("text",{x:790,y:360,"font-size":54,"font-weight":700,fill:"#2e8b57"},svg,"hits "+hits);
+  el("text",{x:790,y:420,"font-size":54,"font-weight":700,fill:"#c0392b"},svg,"misses "+miss);
+  // controls
+  btn(40,470,130,"Step",step);
+  btn(185,470,130,timer?"Pause":"Play",()=>{if(timer)stop();else{timer=setInterval(step,650);draw()}},!!timer);
+  btn(330,470,110,"Reset",reset);
+  btn(480,470,100,"FIFO",()=>{policy="FIFO";reset()},policy==="FIFO");
+  btn(595,470,100,"LRU",()=>{policy="LRU";reset()},policy==="LRU");
+  el("text",{x:730,y:502,"font-size":30},svg,"loop of");
+  btn(810,470,48,"\u2212",()=>{if(N>3){N--;reset()}});
+  el("text",{x:896,y:505,"text-anchor":"middle","font-size":44,"font-weight":700},svg,N);
+  btn(930,470,48,"+",()=>{if(N<8){N++;reset()}});
+  el("text",{x:40,y:580,"font-size":38,"font-weight":700,fill:"#c0392b"},svg,"loop of 5, box of 4: where did the hits go?");
+}
+addEventListener("keydown",e=>{if(e.code==="Space"){e.preventDefault();step()}if(e.key==="r"||e.key==="R")reset()});
+reset();
+</script></body></html>
