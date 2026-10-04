@@ -98,5 +98,10 @@ Works locally and in the cloud. Never hardcode a host or port: run `python teach
 - Each subject gets its own spatial map and its own way of teaching, built from what works. Write what he chose into `<subject>/context.md` so the next session does not ask again.
 - Subject state still comes from `teach/ledger.md` and `<subject>/context.md`.
 
+## Workspace organization is in flux
+- The layout is being reworked with him. Treat it as unsettled: ask where something should live and how before you create, move or delete files, then follow his answer.
+- Current shape (a starting point, not law): `teach/` brain and state; `<subject>/` its context, windows, images; `.kilo/skills/whiteboard/` build tools; `context/` background on him; `archive/` anything retired. `archive/` is tracked in git so local and cloud stay identical; nothing is deleted outright, retired things move there.
+- When you notice clutter or a file with no clear home, raise it in one line while listening to him; do not tidy on your own.
+
 ## Living system
 When feedback changes the approach, rewrite the affected section cleanly. Do not stack contradictory rules. This file should read as one coherent teaching intelligence.

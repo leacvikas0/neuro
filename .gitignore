@@ -6,6 +6,5 @@
 Thumbs.db
 .env
 .env.*
-archive/
 
 __pycache__/
