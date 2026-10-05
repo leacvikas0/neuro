@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "ports": {
+    "preview": 3000
+  },
+  "scripts": {
+    "run": {
+      "enabled": true,
+      "command": "python teach/serve.py 3000"
+    }
+  }
+}

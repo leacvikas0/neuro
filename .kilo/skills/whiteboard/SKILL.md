@@ -13,7 +13,7 @@ The teaching method lives in `teach.md` and the subject's own protocol. This ski
 3. **Fit desktop and tablet (iPad).** Readable text, touch-friendly controls.
 4. **Respect the subject's own rules.** Accuracy first. Label toys and approximations honestly.
 5. **No build step.** One self-contained HTML file per scene, in `<subject>/windows/<name>/`.
-6. **Serve with `python teach/serve.py`.** It prints the URL. Never hardcode a port.
+6. **Serving.** On Hoplite (a `HOPLITE_*` env var is set, or `sandbox_control` exists), use the managed Preview on port 3000: run script `python teach/serve.py 3000`, start it with `preview_start`, and hand off the returned `agent-preview:` reference. Edit pages in place; a refresh shows changes. Locally, run `python teach/serve.py` and share the URL it prints.
 7. **Replay-safe actions** for scenes that have replay (Tales): every action must work when run instantly. See `guides/engine.md`.
 
 ## Optional guides
