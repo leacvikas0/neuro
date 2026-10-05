@@ -1,3 +1,5 @@
+> **Migration note:** this subject has not moved to the new system yet. In the next session, talk with Vikas about the best structure and rearrange this folder as you think best (protocol, context, visualizations, detail files). Use `math/` (Noor) as the reference: a short `context.md` that holds only what he showed he owns, a `protocol.md`, and `visualization/` for pages. Do not carry over old claims about what he understood without checking them. Ask before writing anything.
+
 # Physics Context — Private Notes
 
 *Only the physics teacher reads this.*
