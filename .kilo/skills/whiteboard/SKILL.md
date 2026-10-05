@@ -1,42 +1,29 @@
 ---
 name: whiteboard
-description: Use when Vikas needs a visual or story-driven explanation of a mechanism (math, ML, chemistry, biology, neuro). Builds an interactive sim, a hand-drawn SVG board, or a voiced Tale with characters (ElevenLabs Eleven v4). Read this first, then only the guide for the path you pick.
+description: Use when Vikas needs a visual for a lesson: an interactive sim, a drawn board, or a voiced Tale. The teacher decides what the scene needs; this skill holds only the few hard rules and points to optional guides.
 ---
 
 # Visuals and voice
 
-The teaching method lives in `teach.md`; this skill is the build side. Notes, questions and speech live inside the picture (Caveat handwriting, background `#f7f6f2` for boards), never in HTML text panels.
+The teaching method lives in `teach.md` and the subject's own protocol. This skill is the build side. You decide what each scene needs: form, look, layout, voice.
 
-## Always
-1. **Audio is ElevenLabs Eleven v4. Never v3.** `tts_elevenlabs.py` pins it; the API defaults to v3 if `model_id` is omitted.
-2. **Voiced lessons are performed, not read.** Distinct voices, expressive tags on every line, humour welcome. No flat narrator.
-3. **One layer at a time, on the same picture.** Never replace the board or sim.
-4. **End on a red question and stop.** Do not reveal what it asks him to derive.
-5. **Respect the science gates** in the subject context.
-6. **Replay-safe actions** (boards): Space/Backspace/R rebuild earlier verses instantly, so every action must work when run instantly.
-7. **Fit desktop and tablet (iPad).** Readable text, touch-friendly controls.
-8. **Plan before code.** Approved plan first (see `guides/tale.md`), then build once, carefully. Vikas reports defects; fix exactly those.
-9. **Serve with `python teach/serve.py`.** It prints the URL for local or cloud. Never hardcode a port.
+## Hard rules
+1. **Build iteratively.** Add to the scene as the conversation grows per topic, and plan smartly beforehand. Change or replace anything that is holding the lesson back.
+2. **Build fast and good.** These are one-off creations for one specific purpose. Prefer speed without losing quality.
+3. **Fit desktop and tablet (iPad).** Readable text, touch-friendly controls.
+4. **Respect the subject's own rules.** Accuracy first. Label toys and approximations honestly.
+5. **No build step.** One self-contained HTML file per scene, in `<subject>/windows/<name>/`.
+6. **Serve with `python teach/serve.py`.** It prints the URL. Never hardcode a port.
+7. **Replay-safe actions** for scenes that have replay (Tales): every action must work when run instantly. See `guides/engine.md`.
 
-## Pick a path
-| Need | Make | Read |
-|---|---|---|
-| Moving parts, dials, he predicts then tests | Interactive sim (default) | `guides/sim.md` |
-| Quick picture of one idea | Static board | `guides/static-board.md` |
-| Mechanism as a story with characters | Tale (voiced, verse by verse) | `guides/tale.md` |
-| Anything voiced | + voice rules | `guides/elevenlabs.md` |
-| Board scene code | + engine API | `guides/engine.md` |
+## Optional guides
+Read only what the scene needs.
+| Need | Read |
+|---|---|
+| Moving parts he can play with | `guides/sim.md` |
+| A drawn picture of one idea | `guides/static-board.md` |
+| A voiced story with characters | `guides/tale.md`, `guides/elevenlabs.md`, `guides/engine.md` |
 
-A **Tale** is a lesson, a **Verse** is one step (one drawn element plus its spoken lines), a **Saga** is a series. Sims and Tales combine: a Tale verse can embed a sim he operates.
+These guides describe past habits (Caveat font, `#f7f6f2` background, ElevenLabs v4, verse-by-verse Tales, delegating code to child agents). They are advice, not requirements. Voice engine is a per-subject choice. Build fresh when it is better.
 
-## Delegation (tokens go to code, spend them carefully)
-You are the teacher and planner. Decide target, cast, cause to effect per verse, script and tags yourself. Delegate the heavy code, in parallel.
-- **Visual and scene code goes to the strongest coding model available.** Pass the model explicitly if the environment supports it.
-- **Audio stays with you**: write the script, run `tts_elevenlabs.py` (one command). Models cannot hear audio.
-- **Parallel children get disjoint files** (for example one file per verse).
-- **Prompts are self-contained**: plan, guide paths, cue words from `audio/timing.js`, owned files, "be efficient". Children cannot ask questions.
-- **Reports are 10 lines or fewer**, a useful summary for the teacher. Review reports, not whole files.
-- Do not delegate an edit smaller than its prompt.
-
-## Everything else is advice
-Cast size, style, layout and old pieces are suggestions from past Tales. There is no reuse mandate: build fresh when it is better, and keep a drawing for later only when it is clearly better than what exists. Fixed: element colours and charges, replay-safety.
+The previous, stricter version is in `archive/skills/whiteboard-SKILL.old.md`.
